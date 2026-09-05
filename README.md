@@ -1,4 +1,4 @@
-"""# Pedidos360 - Frontend (Angular)
+# Pedidos360 - Frontend (Angular)
 
 Aplicación cliente desarrollada en **Angular** para la gestión logística y visualización de pedidos en tiempo real, integrada con seguridad corporativa mediante **MSAL (Microsoft Authentication Library)** y comunicada hacia un BFF/Microservicio alojado en la nube.
 
@@ -16,24 +16,26 @@ Aplicación cliente desarrollada en **Angular** para la gestión logística y vi
 
 1. Clona el repositorio:
    ```bash
-   git clone [https://github.com/meninaaa/pedidos360-frontend.git](https://github.com/meninaaa/pedidos360-frontend.git)
+   git clone https://github.com/meninaaa/pedidos360-frontend.git
    cd pedidos360-frontend
-Instala las dependencias:
+   ```
 
-Bash
-npm install
-Configura las credenciales de MSAL en el archivo de entorno o de configuración de autenticación (auth-config.ts).
+2. Instala las dependencias:
+   ```bash
+   npm install
+   ```
 
-Ejecuta el servidor de desarrollo:
+3. Configura las credenciales de MSAL en el archivo de entorno o de configuración de autenticación (`auth-config.ts`).
 
-Bash
-ng serve
-Abre tu navegador en http://localhost:4200.
+4. Ejecuta el servidor de desarrollo:
+   ```bash
+   ng serve
+   ```
+   Abre tu navegador en `http://localhost:4200`.
 
-Despliegue y Construcción
+## Despliegue y Construcción
 Para generar los artefactos de producción optimizados:
-
-Bash
+```bash
 ng build --configuration production
-Los archivos compilados quedarán listos en la carpeta /dist.
-"""****
+```
+Los archivos compilados quedarán listos en la carpeta `/dist`.
