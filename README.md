@@ -1,27 +1,39 @@
-# FrontendPedidos360
+"""# Pedidos360 - Frontend (Angular)
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.21.
+Aplicación cliente desarrollada en **Angular** para la gestión logística y visualización de pedidos en tiempo real, integrada con seguridad corporativa mediante **MSAL (Microsoft Authentication Library)** y comunicada hacia un BFF/Microservicio alojado en la nube.
 
-## Development server
+## Arquitectura y Componentes
+- **Framework Principal:** Angular (TypeScript).
+- **Autenticación:** MSAL Angular para gestión de identidad y tokens de sesión.
+- **Estilos y Componentes:** Interfaz moderna con paneles de control operativos y gestión de registros logísticos.
+- **Comunicación HTTP:** Interceptores y servicios configurados para consumir la API expuesta mediante AWS API Gateway.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## Prerrequisitos
+- Node.js (versión 18 o superior recomendada).
+- Angular CLI.
 
-## Code scaffolding
+## Configuración y Ejecución Local
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+1. Clona el repositorio:
+   ```bash
+   git clone [https://github.com/meninaaa/pedidos360-frontend.git](https://github.com/meninaaa/pedidos360-frontend.git)
+   cd pedidos360-frontend
+Instala las dependencias:
 
-## Build
+Bash
+npm install
+Configura las credenciales de MSAL en el archivo de entorno o de configuración de autenticación (auth-config.ts).
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+Ejecuta el servidor de desarrollo:
 
-## Running unit tests
+Bash
+ng serve
+Abre tu navegador en http://localhost:4200.
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Despliegue y Construcción
+Para generar los artefactos de producción optimizados:
 
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Bash
+ng build --configuration production
+Los archivos compilados quedarán listos en la carpeta /dist.
+"""****
