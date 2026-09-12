@@ -1,0 +1,60 @@
+<div class="dashboard-wrapper">
+  <header class="dashboard-header">
+    <div class="header-info">
+      <h2>Panel General</h2>
+      <span class="user-role">{{ userRoles.join(', ') || 'Usuario' }}</span>
+    </div>
+    <div class="user-greeting">
+      <span>{{ userName }}</span>
+    </div>
+  </header>
+
+  <main class="dashboard-content">
+    
+    <!-- Módulo Administrador -->
+    <section *ngIf="isAdmin" class="role-module">
+      <div class="module-header">
+        <h3>Resumen Ejecutivo</h3>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-label">Ventas Totales (Mes)</span>
+          <span class="metric-value">--</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Pedidos Activos</span>
+          <span class="metric-value">--</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Rendimiento (Lead Time)</span>
+          <span class="metric-value">--</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Módulo Operador -->
+    <section *ngIf="isOperator" class="role-module mt-4">
+      <div class="module-header">
+        <h3>Centro de Operaciones</h3>
+      </div>
+      <div class="action-card">
+        <h4>Flujo Logístico Pendiente</h4>
+        <p>Existen pedidos en estado inicial que requieren validación o despacho.</p>
+        <button class="action-btn">Gestionar Pedidos</button>
+      </div>
+    </section>
+
+    <!-- Módulo Cliente -->
+    <section *ngIf="isCustomer" class="role-module mt-4">
+      <div class="module-header">
+        <h3>Estado de Compras</h3>
+      </div>
+      <div class="action-card">
+        <h4>Seguimiento Reciente</h4>
+        <p>Consulte la trazabilidad y el estado de sus últimas solicitudes procesadas.</p>
+        <button class="action-btn">Ver Historial</button>
+      </div>
+    </section>
+
+  </main>
+</div>

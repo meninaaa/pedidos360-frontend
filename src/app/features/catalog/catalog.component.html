@@ -1,0 +1,48 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h2>Catálogo de Productos</h2>
+      <p class="subtitle">Gestión de inventario y stock disponible</p>
+    </div>
+    <button class="primary-btn">+ Nuevo Producto</button>
+  </div>
+
+  <div class="table-card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre del Producto</th>
+          <th>Precio</th>
+          <th>Stock Actual</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Iteramos sobre los productos reales que trae tu backend -->
+        <tr *ngFor="let prod of productos">
+          <td class="id-cell">#{{ prod.id || 'N/A' }}</td>
+          <td><strong>{{ prod.nombre || prod.name }}</strong></td>
+          <td>{{ (prod.precio || prod.price) | currency:'CLP' }}</td>
+          <td>
+            <span class="stock-badge" [class.low-stock]="(prod.stock) < 10">
+              {{ prod.stock }} unid.
+            </span>
+          </td>
+          <td><span class="status active">Disponible</span></td>
+          <td>
+            <button class="icon-btn">Editar</button>
+          </td>
+        </tr>
+        
+        <!-- Mensaje de carga si el arreglo está vacío -->
+        <tr *ngIf="productos.length === 0">
+          <td colspan="6" class="empty-state">
+            No hay productos cargados o esperando respuesta del servidor...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

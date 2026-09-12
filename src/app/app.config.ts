@@ -22,7 +22,7 @@ export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
     interactionType: InteractionType.Redirect,
     protectedResourceMap: new Map([
       // Intercepta todas las llamadas al BFF local e inyecta el token JWT
-      ['http://localhost:8080/api/bff/', ['api://d7430172-cf9c-438e-8a3a-210f88d2d23c/Backend.Read']]
+      ['http://localhost:8080/api/bff/*', ['api://d7430172-cf9c-438e-8a3a-210f88d2d23c/Backend.Read']]
     ])
   };
 }
