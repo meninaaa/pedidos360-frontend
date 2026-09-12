@@ -16,10 +16,9 @@ import { HttpClient } from '@angular/common/http';
 export class AppComponent implements OnInit {
   title = 'Pedidos360';
   loginDisplay = false;
-  respuestaBackend: string = '';
   
-  // Variable añadida para controlar la navegación del menú lateral
   vistaActual: string = 'dashboard';
+  pedidos: any[] = [];
 
   constructor(
     @Inject(MSAL_GUARD_CONFIG) private msalGuardConfig: MsalGuardConfiguration,
@@ -49,16 +48,15 @@ export class AppComponent implements OnInit {
     this.authService.logoutRedirect();
   }
 
-  pedidos: any[] = [];
-
   llamarAlBackend() {
-    this.http.get<any>('https://j2aqelnuei.execute-api.us-east-1.amazonaws.com/api/estado').subscribe({
+    // Apunta al nuevo BFF local (Ejemplo: Catálogo de productos)
+    this.http.get<any>('http://localhost:8080/api/bff/catalog/products').subscribe({
       next: (res) => {
-        console.log("DATOS RECIBIDOS:", res);
+        console.log("DATOS RECIBIDOS DEL BFF:", res);
         this.pedidos = res; 
       },
       error: (err) => {
-        console.error('ERROR DE CONEXIÓN:', err);
+        console.error('ERROR DE CONEXIÓN AL BFF:', err);
       }
     });
   }

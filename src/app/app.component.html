@@ -1,22 +1,48 @@
 <!-- PANTALLA DE LOGIN -->
 <div class="login-layout" *ngIf="!loginDisplay">
-  <div class="login-panel">
-    <div class="brand">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="brand-icon"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-      <h2>Pedidos360</h2>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="tabs">
+        <div class="tab active">Iniciar sesión</div>
+        <div class="tab">Registrarse</div>
+      </div>
+
+      <form class="login-form">
+        <div class="input-group">
+          <label>Correo electrónico *</label>
+          <input type="email" placeholder="ejemplo@empresa.com" disabled />
+        </div>
+
+        <div class="input-group">
+          <label>Contraseña *</label>
+          <div class="password-wrapper">
+            <input type="password" placeholder="••••••••" disabled />
+            <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </div>
+        </div>
+
+        <button class="btn-primary-login" type="button" disabled>Entrar</button>
+      </form>
+
+      <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+
+      <div class="divider">
+        <span>o</span>
+      </div>
+
+      <!-- El botón real conectado a MSAL -->
+      <button class="btn-sso" (click)="login()">
+        <svg width="18" height="18" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+          <path d="M0 0h10v10H0z" fill="#f25022"/><path d="M11 0h10v10H11z" fill="#7fba00"/>
+          <path d="M0 11h10v10H0z" fill="#00a4ef"/><path d="M11 11h10v10H11z" fill="#ffb900"/>
+        </svg>
+        Continuar con Microsoft
+      </button>
     </div>
-    <p class="login-desc">Portal de Gestión de Operaciones Logísticas</p>
-    <button class="btn-sso" (click)="login()">
-      <svg width="18" height="18" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
-        <path d="M0 0h10v10H0z" fill="#f25022"/><path d="M11 0h10v10H11z" fill="#7fba00"/>
-        <path d="M0 11h10v10H0z" fill="#00a4ef"/><path d="M11 11h10v10H11z" fill="#ffb900"/>
-      </svg>
-      Continuar con Microsoft Entra ID
-    </button>
   </div>
 </div>
 
-<!-- PORTAL INTERNO -->
+<!-- PORTAL INTERNO (Se mantiene igual a tu código anterior) -->
 <div class="admin-layout" *ngIf="loginDisplay">
   
   <!-- BARRA LATERAL (SIDEBAR) -->
@@ -27,11 +53,11 @@
     </div>
     <nav class="sidebar-nav">
       <a class="nav-item" [class.active]="vistaActual === 'dashboard'" (click)="vistaActual = 'dashboard'">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
         Panel General
       </a>
       <a class="nav-item" [class.active]="vistaActual === 'pedidos'" (click)="vistaActual = 'pedidos'">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
         Gestión de Pedidos
       </a>
     </nav>
@@ -69,7 +95,7 @@
           </div>
           <div class="kpi-card">
             <span class="kpi-label">Base de Datos</span>
-            <span class="kpi-value status-ok">H2 (In-Memory)</span>
+            <span class="kpi-value status-ok">Oracle XE</span>
           </div>
         </div>
 
@@ -87,8 +113,8 @@
             <h1 class="page-title">Registros Logísticos</h1>
             <p class="page-subtitle">Sincronización directa con el microservicio a través del BFF.</p>
           </div>
-          <button class="btn-primary" (click)="llamarAlBackend()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+          <button class="btn-primary-action" (click)="llamarAlBackend()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="margin-right: 5px;"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
             Sincronizar Datos
           </button>
         </div>
@@ -115,17 +141,9 @@
             <tbody>
               <tr *ngFor="let p of pedidos">
                 <td class="col-id">#{{ p.id }}</td>
-                <td class="col-product">{{ p.producto }}</td>
+                <td class="col-product">{{ p.producto || p.nombre || p.actionDetails }}</td>
                 <td>
-                  <span class="status-badge" 
-                        [ngClass]="{
-                          'status-success': p.estado === 'Entregado',
-                          'status-warning': p.estado === 'En preparación' || p.estado === 'Pendiente de pago',
-                          'status-info': p.estado === 'En tránsito',
-                          'status-danger': p.estado === 'Cancelado'
-                        }">
-                    {{ p.estado }}
-                  </span>
+                  <span class="status-badge status-success">Procesado</span>
                 </td>
               </tr>
             </tbody>

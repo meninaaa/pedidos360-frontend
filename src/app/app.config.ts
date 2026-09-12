@@ -21,11 +21,8 @@ export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
   return {
     interactionType: InteractionType.Redirect,
     protectedResourceMap: new Map([
-      // Ruta antigua local (por si necesitas probar offline)
-      ['http://localhost:8080/api/estado', ['api://d7430172-cf9c-438e-8a3a-210f88d2d23c/Backend.Read']],
-      
-      // NUEVA RUTA AWS API GATEWAY: Autoriza el JWT para la nube
-      ['https://j2aqelnuei.execute-api.us-east-1.amazonaws.com/api/estado', ['api://d7430172-cf9c-438e-8a3a-210f88d2d23c/Backend.Read']]
+      // Intercepta todas las llamadas al BFF local e inyecta el token JWT
+      ['http://localhost:8080/api/bff/', ['api://d7430172-cf9c-438e-8a3a-210f88d2d23c/Backend.Read']]
     ])
   };
 }
