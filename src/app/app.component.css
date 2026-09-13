@@ -1,24 +1,17 @@
-/* Layout General */
 .app-layout {
   display: flex;
-  width: 100vw;
   height: 100vh;
   background-color: #f4f7f6;
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   overflow: hidden;
-  position: relative;
 }
 
-/* Sidebar Fijo y clickeable */
 .sidebar {
   width: 260px;
-  min-width: 260px;
   background-color: #ffffff;
   border-right: 1px solid #e1e4e8;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  z-index: 10; /* Asegura que esté por encima de cualquier capa */
 }
 
 .brand {
@@ -41,7 +34,6 @@
   padding: 20px 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
 .nav-link {
@@ -52,7 +44,7 @@
   font-weight: 500;
   transition: all 0.2s;
   border-left: 3px solid transparent;
-  cursor: pointer; /* Fuerza el cursor de clic */
+  cursor: pointer;
 }
 
 .nav-link:hover {
@@ -66,20 +58,14 @@
   border-left: 3px solid #0366d6;
 }
 
-/* Área Principal */
 .main-wrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-  position: relative;
-  z-index: 1;
 }
 
 .top-header {
   height: 60px;
-  min-height: 60px;
   background-color: #ffffff;
   border-bottom: 1px solid #e1e4e8;
   display: flex;
@@ -118,10 +104,7 @@
   color: #a71d2a;
 }
 
-/* Contenedor dinámico donde cargan las vistas */
 .content-area {
   flex: 1;
   overflow-y: auto;
-  background-color: #f4f7f6;
-  padding: 0;
 }

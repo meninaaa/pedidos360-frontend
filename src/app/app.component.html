@@ -1,11 +1,8 @@
-<!-- Vista Pública: Solo carga el Router (Login) si no hay sesión -->
 <ng-container *ngIf="!isLoggedIn">
   <router-outlet></router-outlet>
 </ng-container>
 
-<!-- Vista Privada: Estructura corporativa mostrada tras el login -->
 <div *ngIf="isLoggedIn" class="app-layout">
-  
   <!-- Sidebar de Navegación -->
   <aside class="sidebar">
     <div class="brand">
@@ -23,7 +20,6 @@
 
   <!-- Área Principal -->
   <div class="main-wrapper">
-    <!-- Header Superior -->
     <header class="top-header">
       <div class="header-status">
         <span class="status-dot"></span> Sesión activa (MSAL)
@@ -31,7 +27,6 @@
       <button class="logout-btn" (click)="logout()">Cerrar Sesión</button>
     </header>
 
-    <!-- Contenedor Dinámico: Aquí se inyectan el Dashboard, Catálogo, etc. -->
     <main class="content-area">
       <router-outlet></router-outlet>
     </main>

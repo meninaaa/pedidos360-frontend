@@ -1,1 +1,71 @@
-<p>orders works!</p>
+<div style="padding: 30px; background-color: #f4f7f6; min-height: calc(100vh - 60px);">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+    <div>
+      <h2 style="margin: 0; font-size: 22px; color: #1a1a1a;">Gestión de Pedidos</h2>
+      <p style="color: #666; font-size: 14px; margin-top: 5px;">Seguimiento y control de despachos logísticos</p>
+    </div>
+    <button style="background: #0366d6; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: 500; cursor: pointer;">+ Crear Pedido</button>
+  </div>
+
+  <div style="background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); overflow: hidden;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+      <thead>
+        <tr>
+          <th style="background: #f8f9fa; padding: 15px 20px; font-size: 13px; color: #586069; border-bottom: 2px solid #e1e4e8;">ID Pedido</th>
+          <th style="background: #f8f9fa; padding: 15px 20px; font-size: 13px; color: #586069; border-bottom: 2px solid #e1e4e8;">Cliente</th>
+          <th style="background: #f8f9fa; padding: 15px 20px; font-size: 13px; color: #586069; border-bottom: 2px solid #e1e4e8;">Fecha</th>
+          <th style="background: #f8f9fa; padding: 15px 20px; font-size: 13px; color: #586069; border-bottom: 2px solid #e1e4e8;">Total</th>
+          <th style="background: #f8f9fa; padding: 15px 20px; font-size: 13px; color: #586069; border-bottom: 2px solid #e1e4e8;">Estado</th>
+          <th style="background: #f8f9fa; padding: 15px 20px; font-size: 13px; color: #586069; border-bottom: 2px solid #e1e4e8;">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Iteración sobre los datos reales del backend -->
+        <tr *ngFor="let pedido of pedidos">
+          <td style="padding: 15px 20px; border-bottom: 1px solid #e1e4e8; color: #6a737d; font-family: monospace;">{{ pedido.idPedido || pedido.id }}</td>
+          <td style="padding: 15px 20px; border-bottom: 1px solid #e1e4e8; font-weight: bold;">{{ pedido.cliente || pedido.customer }}</td>
+          <td style="padding: 15px 20px; border-bottom: 1px solid #e1e4e8; font-size: 14px;">{{ (pedido.fecha || pedido.date) | date:'dd/MM/yyyy' }}</td>
+          <td style="padding: 15px 20px; border-bottom: 1px solid #e1e4e8; font-size: 14px;">{{ pedido.total | currency:'CLP' }}</td>
+          <td style="padding: 15px 20px; border-bottom: 1px solid #e1e4e8;">
+            <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;"
+                  [ngStyle]="{
+                    'background': (pedido.estado === 'EN_PREPARACION') ? '#fff3e0' : (pedido.estado === 'DESPACHADO' || pedido.estado === 'ENTREGADO') ? '#e6f4ea' : (pedido.estado === 'CANCELADO') ? '#fce8e6' : '#e3f2fd',
+                    'color': (pedido.estado === 'EN_PREPARACION') ? '#e65100' : (pedido.estado === 'DESPACHADO' || pedido.estado === 'ENTREGADO') ? '#1e8e3e' : (pedido.estado === 'CANCELADO') ? '#d93025' : '#0277bd'
+                  }">
+              {{ pedido.estado || pedido.status | uppercase }}
+            </span>
+          </td>
+          <td style="padding: 15px 20px; border-bottom: 1px solid #e1e4e8;">
+            <!-- Lógica de reglas de negocio para los botones -->
+            <button *ngIf="pedido.estado === 'CREADO'" 
+                    style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer;"
+                    (click)="cambiarEstado(pedido.id, 'ACEPTADO')">
+              Aceptar
+            </button>
+            <button *ngIf="pedido.estado === 'ACEPTADO'" 
+                    style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer;"
+                    (click)="cambiarEstado(pedido.id, 'EN_PREPARACION')">
+              Preparar
+            </button>
+            <button *ngIf="pedido.estado === 'EN_PREPARACION'" 
+                    style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer;"
+                    (click)="cambiarEstado(pedido.id, 'DESPACHADO')">
+              Despachar
+            </button>
+            <button *ngIf="pedido.estado === 'DESPACHADO' || pedido.estado === 'ENTREGADO' || pedido.estado === 'CANCELADO'" 
+                    style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+              Ver
+            </button>
+          </td>
+        </tr>
+        
+        <!-- Estado de carga o sin datos -->
+        <tr *ngIf="pedidos.length === 0">
+          <td colspan="6" style="padding: 30px; text-align: center; color: #6a737d; font-style: italic;">
+            Consultando base de datos Oracle o no hay pedidos registrados...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

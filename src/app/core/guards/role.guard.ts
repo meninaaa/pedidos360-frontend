@@ -10,19 +10,20 @@ export class RoleGuard implements CanActivate {
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     const expectedRoles = route.data['roles'] as Array<string>;
-    const account = this.authService.instance.getActiveAccount();
+    const account = this.authService.instance.getActiveAccount() || this.authService.instance.getAllAccounts()[0];
     
-    if (!account || !account.idTokenClaims) {
+    if (!account) {
       this.router.navigate(['/login']);
       return false;
     }
 
-    // Azure AD inyecta los roles configurados en el claim 'roles'
-    const userRoles = (account.idTokenClaims['roles'] as Array<string>) || [];
+    // Ahora lee estrictamente los roles inyectados por Azure AD en el token
+    const userRoles = (account.idTokenClaims?.['roles'] as Array<string>) || [];
+    
     const hasRole = expectedRoles.some(role => userRoles.includes(role));
     
     if (!hasRole) {
-      this.router.navigate(['/dashboard']); // Redirige si no tiene los privilegios
+      this.router.navigate(['/dashboard']); 
       return false;
     }
     
