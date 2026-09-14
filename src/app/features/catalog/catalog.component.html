@@ -4,7 +4,8 @@
       <h2>Catálogo de Productos</h2>
       <p class="subtitle">Gestión de inventario y stock disponible</p>
     </div>
-    <button class="primary-btn">+ Nuevo Producto</button>
+    <!-- Botón conectado para abrir el modal -->
+    <button class="primary-btn" (click)="abrirModalNuevo()">+ Nuevo Producto</button>
   </div>
 
   <div class="table-card">
@@ -20,7 +21,6 @@
         </tr>
       </thead>
       <tbody>
-        <!-- Iteramos sobre los productos reales que trae tu backend -->
         <tr *ngFor="let prod of productos">
           <td class="id-cell">#{{ prod.id || 'N/A' }}</td>
           <td><strong>{{ prod.nombre || prod.name }}</strong></td>
@@ -30,13 +30,12 @@
               {{ prod.stock }} unid.
             </span>
           </td>
-          <td><span class="status active">Disponible</span></td>
+          <td><span class="status active">{{ prod.estado || 'Disponible' }}</span></td>
           <td>
-            <button class="icon-btn">Editar</button>
-          </td>
-        </tr>
+            <!-- Botón conectado para editar el producto específico -->
+            <button class="icon-btn" (click)="abrirModalEditar(prod)">Editar</button>
+            <button style="background: transparent; border: 1px solid #d93025; color: #d93025; padding: 6px 12px; border-radius: 4px; cursor: pointer;" (click)="eliminarProducto(prod.id)">Eliminar</button>
         
-        <!-- Mensaje de carga si el arreglo está vacío -->
         <tr *ngIf="productos.length === 0">
           <td colspan="6" class="empty-state">
             No hay productos cargados o esperando respuesta del servidor...
@@ -44,5 +43,32 @@
         </tr>
       </tbody>
     </table>
+  </div>
+</div>
+
+<!-- MODAL FLOTANTE PARA CREAR / EDITAR -->
+<div *ngIf="mostrarModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;">
+  <div style="background: white; padding: 30px; border-radius: 8px; width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+    <h3 style="margin-top: 0; color: #1a1a1a;">{{ modoEdicion ? 'Editar Producto' : 'Nuevo Producto' }}</h3>
+    
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">Nombre del Producto</label>
+      <input type="text" [(ngModel)]="productoActual.nombre" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+    </div>
+
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">Precio (CLP)</label>
+      <input type="number" [(ngModel)]="productoActual.precio" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">Stock</label>
+      <input type="number" [(ngModel)]="productoActual.stock" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+      <button (click)="cerrarModal()" style="background: #f1f3f4; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Cancelar</button>
+      <button (click)="guardarProducto()" style="background: #0366d6; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Guardar</button>
+    </div>
   </div>
 </div>

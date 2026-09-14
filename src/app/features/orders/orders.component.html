@@ -1,10 +1,41 @@
+<!-- Alerta Flotante de Éxito/Error -->
+<div *ngIf="notificacion" 
+     style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); 
+            background-color: #1e8e3e; color: white; padding: 12px 24px; 
+            border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+            z-index: 9999; font-weight: 500; font-size: 14px; 
+            display: flex; align-items: center; gap: 10px;">
+  <span style="font-size: 18px;">✓</span> {{ notificacion }}
+</div>
+
 <div style="padding: 30px; background-color: #f4f7f6; min-height: calc(100vh - 60px);">
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
     <div>
       <h2 style="margin: 0; font-size: 22px; color: #1a1a1a;">Gestión de Pedidos</h2>
       <p style="color: #666; font-size: 14px; margin-top: 5px;">Seguimiento y control de despachos logísticos</p>
     </div>
-    <button style="background: #0366d6; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: 500; cursor: pointer;">+ Crear Pedido</button>
+    <!-- Botón para alternar la visibilidad del formulario en la página -->
+    <button (click)="mostrarFormulario = !mostrarFormulario" style="background: #0366d6; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: 500; cursor: pointer;">
+      {{ mostrarFormulario ? 'Cancelar' : '+ Crear Pedido' }}
+    </button>
+  </div>
+
+  <!-- Formulario Integrado Directamente en la Página -->
+  <div *ngIf="mostrarFormulario" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 25px; border: 1px solid #e1e4e8;">
+    <h3 style="margin-top: 0; font-size: 16px; color: #24292e; margin-bottom: 15px;">Registrar Nuevo Pedido</h3>
+    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 250px;">
+        <label style="display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; color: #586069;">Cliente / Empresa:</label>
+        <input type="text" [(ngModel)]="nuevoCliente" placeholder="Ej. Empresa Alpha S.A." style="width: 100%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+      </div>
+      <div style="flex: 1; min-width: 250px;">
+        <label style="display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; color: #586069;">Total (CLP):</label>
+        <input type="number" [(ngModel)]="nuevoTotal" placeholder="Ej. 75000" style="width: 100%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+      </div>
+      <div style="display: flex; align-items: flex-end;">
+        <button (click)="guardarPedido()" style="background: #2ea44f; color: white; border: none; padding: 9px 20px; border-radius: 4px; font-weight: 500; cursor: pointer;">Guardar y Emitir</button>
+      </div>
+    </div>
   </div>
 
   <div style="background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); overflow: hidden;">
@@ -20,50 +51,29 @@
         </tr>
       </thead>
       <tbody>
-        <!-- Iteración sobre los datos reales del backend -->
         <tr *ngFor="let pedido of pedidos">
-          <td style="padding: 15px 20px; border-bottom: 1px solid #e1e4e8; color: #6a737d; font-family: monospace;">{{ pedido.idPedido || pedido.id }}</td>
-          <td style="padding: 15px 20px; border-bottom: 1px solid #e1e4e8; font-weight: bold;">{{ pedido.cliente || pedido.customer }}</td>
-          <td style="padding: 15px 20px; border-bottom: 1px solid #e1e4e8; font-size: 14px;">{{ (pedido.fecha || pedido.date) | date:'dd/MM/yyyy' }}</td>
+          <td style="padding: 15px 20px; border-bottom: 1px solid #e1e4e8; color: #6a737d; font-family: monospace;">{{ pedido.id }}</td>
+          <td style="padding: 15px 20px; border-bottom: 1px solid #e1e4e8; font-weight: bold;">{{ pedido.customerId }}</td>
+          <td style="padding: 15px 20px; border-bottom: 1px solid #e1e4e8; font-size: 14px;">{{ pedido.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
           <td style="padding: 15px 20px; border-bottom: 1px solid #e1e4e8; font-size: 14px;">{{ pedido.total | currency:'CLP' }}</td>
           <td style="padding: 15px 20px; border-bottom: 1px solid #e1e4e8;">
             <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;"
                   [ngStyle]="{
-                    'background': (pedido.estado === 'EN_PREPARACION') ? '#fff3e0' : (pedido.estado === 'DESPACHADO' || pedido.estado === 'ENTREGADO') ? '#e6f4ea' : (pedido.estado === 'CANCELADO') ? '#fce8e6' : '#e3f2fd',
-                    'color': (pedido.estado === 'EN_PREPARACION') ? '#e65100' : (pedido.estado === 'DESPACHADO' || pedido.estado === 'ENTREGADO') ? '#1e8e3e' : (pedido.estado === 'CANCELADO') ? '#d93025' : '#0277bd'
+                    'background': (pedido.status === 'EN_PREPARACION') ? '#fff3e0' : (pedido.status === 'DESPACHADO' || pedido.status === 'ENTREGADO') ? '#e6f4ea' : (pedido.status === 'CANCELADO') ? '#fce8e6' : '#e3f2fd',
+                    'color': (pedido.status === 'EN_PREPARACION') ? '#e65100' : (pedido.status === 'DESPACHADO' || pedido.status === 'ENTREGADO') ? '#1e8e3e' : (pedido.status === 'CANCELADO') ? '#d93025' : '#0277bd'
                   }">
-              {{ pedido.estado || pedido.status | uppercase }}
+              {{ pedido.status | uppercase }}
             </span>
           </td>
           <td style="padding: 15px 20px; border-bottom: 1px solid #e1e4e8;">
-            <!-- Lógica de reglas de negocio para los botones -->
-            <button *ngIf="pedido.estado === 'CREADO'" 
-                    style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer;"
-                    (click)="cambiarEstado(pedido.id, 'ACEPTADO')">
-              Aceptar
-            </button>
-            <button *ngIf="pedido.estado === 'ACEPTADO'" 
-                    style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer;"
-                    (click)="cambiarEstado(pedido.id, 'EN_PREPARACION')">
-              Preparar
-            </button>
-            <button *ngIf="pedido.estado === 'EN_PREPARACION'" 
-                    style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer;"
-                    (click)="cambiarEstado(pedido.id, 'DESPACHADO')">
-              Despachar
-            </button>
-            <button *ngIf="pedido.estado === 'DESPACHADO' || pedido.estado === 'ENTREGADO' || pedido.estado === 'CANCELADO'" 
-                    style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
-              Ver
-            </button>
+            <button *ngIf="pedido.status === 'CREADO'" style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer;" (click)="cambiarEstado(pedido.id, 'ACEPTADO')">Aceptar</button>
+            <button *ngIf="pedido.status === 'ACEPTADO'" style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer;" (click)="cambiarEstado(pedido.id, 'EN_PREPARACION')">Preparar</button>
+            <button *ngIf="pedido.status === 'EN_PREPARACION'" style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer;" (click)="cambiarEstado(pedido.id, 'DESPACHADO')">Despachar</button>
+            <button *ngIf="pedido.status === 'DESPACHADO' || pedido.status === 'ENTREGADO' || pedido.status === 'CANCELADO'" style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Ver</button>
           </td>
         </tr>
-        
-        <!-- Estado de carga o sin datos -->
         <tr *ngIf="pedidos.length === 0">
-          <td colspan="6" style="padding: 30px; text-align: center; color: #6a737d; font-style: italic;">
-            Consultando base de datos Oracle o no hay pedidos registrados...
-          </td>
+          <td colspan="6" style="padding: 30px; text-align: center; color: #6a737d; font-style: italic;">Consultando base de datos Oracle o no hay pedidos registrados...</td>
         </tr>
       </tbody>
     </table>

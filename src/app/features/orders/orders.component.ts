@@ -1,67 +1,81 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { MsalService } from '@azure/msal-angular';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './orders.component.html',
-  styleUrls: ['./orders.component.css']
+  imports: [CommonModule, FormsModule],
+  templateUrl: './orders.component.html'
 })
 export class OrdersComponent implements OnInit {
   pedidos: any[] = [];
   
-  // Variables de roles
-  isAdmin = false;
-  isOperator = false;
-  isCustomer = false;
+  // Variables para controlar el formulario en la página
+  mostrarFormulario: boolean = false;
+  nuevoCliente: string = '';
+  nuevoTotal: number | null = null;
+  
+  notificacion: string | null = null;
 
-  constructor(private http: HttpClient, private authService: MsalService) {}
+  constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.verificarRoles();
     this.cargarPedidos();
-  }
-
-  verificarRoles() {
-    const account = this.authService.instance.getActiveAccount() || this.authService.instance.getAllAccounts()[0];
-    if (account) {
-      // Se eliminó el bypass: Ahora lee estrictamente los roles inyectados por Azure AD
-      const userRoles = (account.idTokenClaims?.['roles'] as string[]) || [];
-      
-      this.isAdmin = userRoles.includes('Admin');
-      this.isOperator = userRoles.includes('Operador') || userRoles.includes('Operator');
-      this.isCustomer = userRoles.includes('Cliente') || userRoles.includes('Customer');
-      
-      console.log('Roles detectados por Azure AD:', userRoles);
-    }
   }
 
   cargarPedidos() {
     this.http.get<any[]>('http://localhost:8080/api/bff/orders').subscribe({
-      next: (res) => {
-        this.pedidos = res;
+      next: (data) => this.pedidos = data || [],
+      error: (err) => console.error('Error cargando pedidos:', err)
+    });
+  }
+
+  guardarPedido() {
+    if (!this.nuevoCliente || !this.nuevoTotal) {
+      this.mostrarNotificacion('Por favor completa todos los campos.');
+      return;
+    }
+
+    const payload = {
+      customerId: this.nuevoCliente.trim(),
+      total: this.nuevoTotal
+    };
+
+    this.http.post('http://localhost:8080/api/bff/orders', payload).subscribe({
+      next: () => {
+        this.cargarPedidos();
+        this.mostrarNotificacion(`¡Pedido para ${this.nuevoCliente} creado con éxito!`);
+        // Limpiamos y ocultamos el formulario
+        this.nuevoCliente = '';
+        this.nuevoTotal = null;
+        this.mostrarFormulario = false;
       },
       error: (err) => {
-        console.error('Error cargando pedidos desde el BFF:', err);
+        console.error('Error al crear pedido:', err);
+        this.mostrarNotificacion('Error al intentar crear el pedido en el servidor.');
       }
     });
   }
 
-  cambiarEstado(pedidoId: string, nuevoEstado: string) {
-    // Llamada al BFF a través de PUT enviando el nuevo estado
-    this.http.put(`http://localhost:8080/api/bff/orders/${pedidoId}/status?nuevoEstado=${nuevoEstado}`, {}).subscribe({
-      next: (res) => {
-        console.log(`Estado del pedido ${pedidoId} actualizado exitosamente a ${nuevoEstado}`);
-        // Recargamos la lista para reflejar el cambio en la tabla de inmediato
+  cambiarEstado(id: number, nuevoEstado: string) {
+    this.http.put(`http://localhost:8080/api/bff/orders/${id}/status?nuevoEstado=${nuevoEstado}`, {}).subscribe({
+      next: () => {
         this.cargarPedidos();
+        this.mostrarNotificacion(`Pedido #${id} actualizado a ${nuevoEstado}.`);
       },
       error: (err) => {
-        console.error('Error al actualizar el estado del pedido:', err);
-        alert('No se pudo actualizar el estado. Verifica tus permisos de rol.');
+        console.error('Error cambiando estado:', err);
+        this.mostrarNotificacion('No se pudo cambiar el estado del pedido.');
       }
     });
+  }
+
+  mostrarNotificacion(mensaje: string) {
+    this.notificacion = mensaje;
+    setTimeout(() => {
+      this.notificacion = null;
+    }, 4000);
   }
 }

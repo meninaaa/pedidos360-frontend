@@ -17,12 +17,17 @@ export class RoleGuard implements CanActivate {
       return false;
     }
 
-    // Ahora lee estrictamente los roles inyectados por Azure AD en el token
     const userRoles = (account.idTokenClaims?.['roles'] as Array<string>) || [];
+    
+    // Logs para depuración
+    console.log('RoleGuard - Ruta destino:', route.routeConfig?.path);
+    console.log('RoleGuard - Roles esperados:', expectedRoles);
+    console.log('RoleGuard - Roles en tu token de Azure:', userRoles);
     
     const hasRole = expectedRoles.some(role => userRoles.includes(role));
     
     if (!hasRole) {
+      console.error('⛔ BLOQUEADO: No tienes permisos. Redirigiendo al Dashboard.');
       this.router.navigate(['/dashboard']); 
       return false;
     }

@@ -10,50 +10,76 @@
   </header>
 
   <main class="dashboard-content">
-    
-    <!-- Módulo Administrador -->
+
+    <!-- Admin: KPIs globales -->
     <section *ngIf="isAdmin" class="role-module">
       <div class="module-header">
         <h3>Resumen Ejecutivo</h3>
       </div>
       <div class="metrics-grid">
         <div class="metric-card">
-          <span class="metric-label">Ventas Totales (Mes)</span>
-          <span class="metric-value">--</span>
+          <span class="metric-label">Ventas Totales</span>
+          <span class="metric-value">{{ resumenAdmin.ventasTotales | currency:'CLP' }}</span>
         </div>
         <div class="metric-card">
           <span class="metric-label">Pedidos Activos</span>
-          <span class="metric-value">--</span>
+          <span class="metric-value">{{ resumenAdmin.pedidosActivos }}</span>
         </div>
         <div class="metric-card">
-          <span class="metric-label">Rendimiento (Lead Time)</span>
-          <span class="metric-value">--</span>
+          <span class="metric-label">Usuarios Activos</span>
+          <span class="metric-value">{{ resumenAdmin.usuariosActivos }}</span>
         </div>
       </div>
+      <p class="module-link">
+        <a routerLink="/reports">Ver reportería completa y gráficos →</a>
+      </p>
     </section>
 
-    <!-- Módulo Operador -->
+    <!-- Operator: pedidos en curso y pendientes -->
     <section *ngIf="isOperator" class="role-module mt-4">
       <div class="module-header">
-        <h3>Centro de Operaciones</h3>
+        <h3>Pedidos en curso y pendientes</h3>
       </div>
-      <div class="action-card">
-        <h4>Flujo Logístico Pendiente</h4>
-        <p>Existen pedidos en estado inicial que requieren validación o despacho.</p>
-        <button class="action-btn">Gestionar Pedidos</button>
-      </div>
+      <table class="orders-table" *ngIf="pedidosOperador.length > 0; else sinPendientes">
+        <thead>
+          <tr><th>ID</th><th>Cliente</th><th>Estado</th><th>Total</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of pedidosOperador">
+            <td>{{ p.id }}</td>
+            <td>{{ p.customerId }}</td>
+            <td>{{ p.status }}</td>
+            <td>{{ p.total | currency:'CLP' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #sinPendientes>
+        <p>No hay pedidos pendientes en este momento.</p>
+      </ng-template>
+      <button class="action-btn" routerLink="/orders">Gestionar Pedidos</button>
     </section>
 
-    <!-- Módulo Cliente -->
+    <!-- Customer: últimos pedidos y estado actual -->
     <section *ngIf="isCustomer" class="role-module mt-4">
       <div class="module-header">
-        <h3>Estado de Compras</h3>
+        <h3>Mis últimos pedidos</h3>
       </div>
-      <div class="action-card">
-        <h4>Seguimiento Reciente</h4>
-        <p>Consulte la trazabilidad y el estado de sus últimas solicitudes procesadas.</p>
-        <button class="action-btn">Ver Historial</button>
-      </div>
+      <table class="orders-table" *ngIf="pedidosCliente.length > 0; else sinPedidos">
+        <thead>
+          <tr><th>ID</th><th>Estado</th><th>Total</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of pedidosCliente">
+            <td>{{ p.id }}</td>
+            <td>{{ p.status }}</td>
+            <td>{{ p.total | currency:'CLP' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #sinPedidos>
+        <p>Aún no tienes pedidos registrados.</p>
+      </ng-template>
+      <button class="action-btn" routerLink="/orders">Ver Historial</button>
     </section>
 
   </main>
