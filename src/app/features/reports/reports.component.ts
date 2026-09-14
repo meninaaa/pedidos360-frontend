@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReportService, ResumenKpis, PuntoVentaPorHora, PuntoLeadTime } from '../../core/report.service';
-import { SalesChartComponent } from './sales-chart.component';
-import { LeadTimeChartComponent } from './lead-time-chart.component';
-import { TopProductsChartComponent } from './top-products-chart.component';
+import { SalesChartComponent } from './grafics/sales-chart.component';
+import { LeadTimeChartComponent } from './grafics/lead-time-chart.component';
+import { TopProductsChartComponent } from './grafics/top-products-chart.component';
 
 @Component({
   selector: 'app-reports',

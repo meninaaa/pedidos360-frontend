@@ -1,18 +1,18 @@
 import { AfterViewInit, Component, ElementRef, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Chart, registerables } from 'chart.js';
-import { PuntoLeadTime } from '../../core/report.service';
+import { PuntoVentaPorHora } from '../../../core/report.service';
 
 Chart.register(...registerables);
 
 @Component({
-  selector: 'app-lead-time-chart',
+  selector: 'app-sales-chart',
   standalone: true,
   imports: [CommonModule],
   template: `<canvas #canvasRef></canvas>`
 })
-export class LeadTimeChartComponent implements AfterViewInit, OnChanges {
-  @Input() datos: PuntoLeadTime[] = [];
+export class SalesChartComponent implements AfterViewInit, OnChanges {
+  @Input() datos: PuntoVentaPorHora[] = [];
   @ViewChild('canvasRef') canvasRef!: ElementRef<HTMLCanvasElement>;
   private chart?: Chart;
 
@@ -31,14 +31,13 @@ export class LeadTimeChartComponent implements AfterViewInit, OnChanges {
       this.chart.destroy();
     }
     this.chart = new Chart(this.canvasRef.nativeElement, {
-      type: 'line',
+      type: 'bar',
       data: {
-        labels: this.datos.map(d => `Pedido #${d.orderId}`),
+        labels: this.datos.map(d => d.hora),
         datasets: [{
-          label: 'Lead Time (horas)',
-          data: this.datos.map(d => d.leadTimeHoras),
-          borderColor: '#16a34a',
-          tension: 0.3
+          label: 'Ventas (CLP)',
+          data: this.datos.map(d => d.ventas),
+          backgroundColor: '#4f46e5'
         }]
       },
       options: {
