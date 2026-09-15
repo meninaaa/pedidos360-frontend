@@ -19,8 +19,8 @@
       <!-- Vista Cliente: Solo ve SUS pedidos -->
       <a *ngIf="isCustomer" routerLink="/orders" routerLinkActive="active-link" class="nav-link">Mis Pedidos</a>
       
-      <!-- Catálogo: Cliente (para comprar) y Admin (para gestionar) -->
-      <a *ngIf="isAdmin || isCustomer" routerLink="/catalog" routerLinkActive="active-link" class="nav-link">Catálogo de Productos</a>
+      <!-- Catálogo: Visible para Admin, Operador (consulta) y Cliente -->
+      <a *ngIf="isAdmin || isOperator || isCustomer" routerLink="/catalog" routerLinkActive="active-link" class="nav-link">Catálogo de Productos</a>
       
       <!-- Reportería y Auditoría: Exclusivo del Administrador -->
       <a *ngIf="isAdmin" routerLink="/reports" routerLinkActive="active-link" class="nav-link">Reportería</a>

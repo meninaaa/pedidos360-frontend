@@ -10,19 +10,14 @@ import { ReportsComponent } from './features/reports/reports.component';
 import { AuditComponent } from './features/audit/audit.component';
 
 export const routes: Routes = [
-  // Ruta por defecto redirige al login si no hay sesión, o al dashboard si la hay
   { path: '', redirectTo: '/login', pathMatch: 'full' },
-  
-  // Login es público
   { path: 'login', component: LoginComponent },
-  
-  // MSAL necesita una ruta limpia sin guards para aterrizar después del login en Azure
   { path: 'auth/callback', component: LoginComponent }, 
 
   // Rutas Privadas
   { path: 'dashboard', component: DashboardComponent, canActivate: [MsalGuard] },
   
-  // Gestión de pedidos (Tienen acceso los 3, usando los nombres exactos de Azure)
+  // Gestión de pedidos (Acceso Admin, Operador y Cliente)
   { 
     path: 'orders', 
     component: OrdersComponent, 
@@ -30,12 +25,12 @@ export const routes: Routes = [
     data: { roles: ['Administrador', 'Admin', 'Operador de Logística', 'Operador', 'Cliente', 'Customer'] } 
   },
   
-  // Catálogo (Tienen acceso el Admin para gestionar y el Cliente para comprar)
+  // Catálogo: Ahora el Operador también puede entrar a consultar, pero sin botones de edición
   { 
     path: 'catalog', 
     component: CatalogComponent, 
     canActivate: [MsalGuard, RoleGuard], 
-    data: { roles: ['Administrador', 'Admin', 'Cliente', 'Customer'] } 
+    data: { roles: ['Administrador', 'Admin', 'Operador de Logística', 'Operador', 'Cliente', 'Customer'] } 
   },
   
   // Reportería y Auditoría (Solo Admin)
