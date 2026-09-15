@@ -40,23 +40,38 @@
       <div class="module-header">
         <h3>Pedidos en curso y pendientes</h3>
       </div>
-      <table class="orders-table" *ngIf="pedidosOperador.length > 0; else sinPendientes">
-        <thead>
-          <tr><th>ID</th><th>Cliente</th><th>Estado</th><th>Total</th></tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let p of pedidosOperador">
-            <td>{{ p.id }}</td>
-            <td>{{ p.customerId }}</td>
-            <td>{{ p.status }}</td>
-            <td>{{ p.total | currency:'CLP' }}</td>
-          </tr>
-        </tbody>
-      </table>
-      <ng-template #sinPendientes>
-        <p>No hay pedidos pendientes en este momento.</p>
-      </ng-template>
-      <button class="action-btn" routerLink="/orders">Gestionar Pedidos</button>
+      
+      <!-- Contenedor limpio estilo tarjeta -->
+      <div style="background: white; border: 1px solid #eaeaea; border-radius: 8px; padding: 24px; margin-top: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+        <table class="orders-table" *ngIf="pedidosOperador.length > 0; else sinPendientes" style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 2px solid #f0f0f0;">
+              <th style="padding: 12px 8px; color: #555; font-weight: 600;">ID Pedido</th>
+              <th style="padding: 12px 8px; color: #555; font-weight: 600;">Cliente</th>
+              <th style="padding: 12px 8px; color: #555; font-weight: 600;">Estado</th>
+              <th style="padding: 12px 8px; color: #555; font-weight: 600; text-align: right;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of pedidosOperador" style="border-bottom: 1px solid #f9f9f9;">
+              <td style="padding: 16px 8px; font-weight: 500; color: #333;">#{{ p.id }}</td>
+              <td style="padding: 16px 8px; color: #555;">{{ p.customerId }}</td>
+              <td style="padding: 16px 8px; font-weight: 500; color: #0056b3;">{{ p.status }}</td>
+              <td style="padding: 16px 8px; text-align: right; color: #333; font-weight: 500;">{{ p.total | currency:'CLP':'symbol-narrow' }}</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <ng-template #sinPendientes>
+          <div style="text-align: center; padding: 30px 0; color: #888;">
+            <p style="margin: 0; font-size: 15px;">No hay pedidos pendientes en este momento.</p>
+          </div>
+        </ng-template>
+
+        <div style="text-align: right; margin-top: 24px;">
+          <button class="action-btn" routerLink="/orders">Gestionar Pedidos</button>
+        </div>
+      </div>
     </section>
 
     <!-- Customer: últimos pedidos y estado actual -->
@@ -64,22 +79,36 @@
       <div class="module-header">
         <h3>Mis últimos pedidos</h3>
       </div>
-      <table class="orders-table" *ngIf="pedidosCliente.length > 0; else sinPedidos">
-        <thead>
-          <tr><th>ID</th><th>Estado</th><th>Total</th></tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let p of pedidosCliente">
-            <td>{{ p.id }}</td>
-            <td>{{ p.status }}</td>
-            <td>{{ p.total | currency:'CLP' }}</td>
-          </tr>
-        </tbody>
-      </table>
-      <ng-template #sinPedidos>
-        <p>Aún no tienes pedidos registrados.</p>
-      </ng-template>
-      <button class="btn btn-success" routerLink="/orders">Ver Historial</button>
+      
+      <!-- Contenedor limpio estilo tarjeta -->
+      <div style="background: white; border: 1px solid #eaeaea; border-radius: 8px; padding: 24px; margin-top: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+        <table class="orders-table" *ngIf="pedidosCliente.length > 0; else sinPedidos" style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 2px solid #f0f0f0;">
+              <th style="padding: 12px 8px; color: #555; font-weight: 600;">ID Pedido</th>
+              <th style="padding: 12px 8px; color: #555; font-weight: 600;">Estado</th>
+              <th style="padding: 12px 8px; color: #555; font-weight: 600; text-align: right;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of pedidosCliente" style="border-bottom: 1px solid #f9f9f9;">
+              <td style="padding: 16px 8px; font-weight: 500; color: #333;">#{{ p.id }}</td>
+              <td style="padding: 16px 8px; font-weight: 500; color: #0f5132;">{{ p.status }}</td>
+              <td style="padding: 16px 8px; text-align: right; color: #333; font-weight: 500;">{{ p.total | currency:'CLP':'symbol-narrow' }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <ng-template #sinPedidos>
+          <div style="text-align: center; padding: 30px 0; color: #888;">
+            <p style="margin: 0; font-size: 15px;">Aún no tienes pedidos registrados.</p>
+          </div>
+        </ng-template>
+
+        <div style="text-align: right; margin-top: 24px;">
+          <button class="action-btn" routerLink="/orders">Ver Historial</button>
+        </div>
+      </div>
     </section>
 
   </main>

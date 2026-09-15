@@ -26,8 +26,7 @@ export class OrdersComponent implements OnInit {
   }
 
   cargarPedidos() {
-    // Si es cliente, llamamos a /me. (O puedes verificar el rol aquí mismo)
-    this.http.get<any[]>('https://3lgyldt561.execute-api.us-east-1.amazonaws.com/api/bff/orders/me').subscribe({
+    this.http.get<any[]>('https://3lgyldt561.execute-api.us-east-1.amazonaws.com/api/bff/orders').subscribe({
       next: (data) => this.pedidos = data || [],
       error: (err) => console.error('Error cargando pedidos:', err)
     });
