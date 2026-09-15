@@ -11,7 +11,6 @@
 <div style="padding: 30px; background-color: #f4f7f6; min-height: calc(100vh - 60px);">
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
     <div>
-      <!-- Título Dinámico -->
       <h2 style="margin: 0; font-size: 22px; color: #1a1a1a;">
         {{ isCustomer ? 'Mis Pedidos' : 'Gestión de Pedidos' }}
       </h2>
@@ -19,7 +18,6 @@
         {{ isCustomer ? 'Historial y seguimiento de tus compras' : 'Seguimiento y control de despachos logísticos' }}
       </p>
     </div>
-    <!-- Botón para alternar la visibilidad del formulario en la página -->
     <button (click)="mostrarFormulario = !mostrarFormulario" style="background: #0366d6; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: 500; cursor: pointer;">
       {{ mostrarFormulario ? 'Cancelar' : '+ Crear Pedido' }}
     </button>
@@ -28,19 +26,35 @@
   <!-- Formulario Integrado Directamente en la Página -->
   <div *ngIf="mostrarFormulario" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 25px; border: 1px solid #e1e4e8;">
     <h3 style="margin-top: 0; font-size: 16px; color: #24292e; margin-bottom: 15px;">Registrar Nuevo Pedido</h3>
+    
     <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-      <div style="flex: 1; min-width: 250px;">
+      <!-- Campo Cliente -->
+      <div style="flex: 1; min-width: 220px;">
         <label style="display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; color: #586069;">Cliente / Empresa:</label>
-        <!-- Campo deshabilitado (bloqueado) si el usuario es un Cliente -->
         <input type="text" [(ngModel)]="nuevoCliente" [disabled]="isCustomer" 
                [ngStyle]="{'background-color': isCustomer ? '#f3f4f6' : 'white', 'cursor': isCustomer ? 'not-allowed' : 'text'}"
                placeholder="Ej. Empresa Alpha S.A." 
                style="width: 100%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
       </div>
-      <div style="flex: 1; min-width: 250px;">
+
+      <!-- Selector de Productos del Catálogo -->
+      <div style="flex: 1; min-width: 220px;">
+        <label style="display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; color: #586069;">Seleccionar Producto:</label>
+        <select [(ngModel)]="productoSeleccionadoId" (change)="onProductoChange()" 
+                style="width: 100%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background: white;">
+          <option [ngValue]="null">-- Elige un producto --</option>
+          <option *ngFor="let p of productosDisponibles" [ngValue]="p.id">
+            {{ p.nombre || p.name }} ({{ (p.precio || p.price) | currency:'CLP' }})
+          </option>
+        </select>
+      </div>
+
+      <!-- Campo Total (Autocompletado o manual) -->
+      <div style="flex: 1; min-width: 180px;">
         <label style="display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; color: #586069;">Total (CLP):</label>
         <input type="number" [(ngModel)]="nuevoTotal" placeholder="Ej. 75000" style="width: 100%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
       </div>
+
       <div style="display: flex; align-items: flex-end;">
         <button (click)="guardarPedido()" style="background: #2ea44f; color: white; border: none; padding: 9px 20px; border-radius: 4px; font-weight: 500; cursor: pointer;">Guardar y Emitir</button>
       </div>
@@ -75,14 +89,12 @@
             </span>
           </td>
           <td style="padding: 15px 20px; border-bottom: 1px solid #e1e4e8; display: flex; gap: 8px;">
-            <!-- Controles de Operador/Admin: Solo se muestran si NO es Cliente -->
             <ng-container *ngIf="!isCustomer">
               <button *ngIf="pedido.status === 'CREADO'" style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer; color: #0366d6;" (click)="cambiarEstado(pedido.id, 'ACEPTADO')">Aceptar</button>
               <button *ngIf="pedido.status === 'ACEPTADO'" style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer; color: #e65100;" (click)="cambiarEstado(pedido.id, 'EN_PREPARACION')">Preparar</button>
               <button *ngIf="pedido.status === 'EN_PREPARACION'" style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer; color: #1e8e3e;" (click)="cambiarEstado(pedido.id, 'DESPACHADO')">Despachar</button>
             </ng-container>
             
-            <!-- Botón genérico para ver, visible siempre o al final del flujo -->
             <button *ngIf="isCustomer || pedido.status === 'DESPACHADO' || pedido.status === 'ENTREGADO' || pedido.status === 'CANCELADO'" style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Ver Detalle</button>
           </td>
         </tr>

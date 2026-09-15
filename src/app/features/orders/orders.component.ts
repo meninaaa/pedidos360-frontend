@@ -12,6 +12,7 @@ import { MsalService } from '@azure/msal-angular';
 })
 export class OrdersComponent implements OnInit {
   pedidos: any[] = [];
+  productosDisponibles: any[] = []; // Lista para el selector de productos
   
   // Variables para control de roles
   isAdmin: boolean = false;
@@ -22,6 +23,7 @@ export class OrdersComponent implements OnInit {
   // Variables para controlar el formulario
   mostrarFormulario: boolean = false;
   nuevoCliente: string = '';
+  productoSeleccionadoId: number | null = null;
   nuevoTotal: number | null = null;
   notificacion: string | null = null;
 
@@ -30,24 +32,22 @@ export class OrdersComponent implements OnInit {
   ngOnInit(): void {
     this.verificarRolYUsuario();
     this.cargarPedidos();
+    this.cargarProductos(); // Cargamos el catálogo para el formulario
   }
 
   verificarRolYUsuario() {
     const accounts = this.msalService.instance.getAllAccounts();
     if (accounts.length > 0) {
       const account = accounts[0];
-      this.userEmail = account.username; // Rescata el correo con el que inició sesión
+      this.userEmail = account.username; 
       
       const claims: any = account.idTokenClaims;
       const roles = claims?.roles || []; 
 
       this.isAdmin = roles.includes('Administrador') || roles.includes('Admin');
       this.isOperator = roles.includes('Operador de Logística') || roles.includes('Operador');
-      
-      // Si no es admin ni operador, es un cliente final
       this.isCustomer = roles.includes('Cliente') || roles.includes('Customer') || (!this.isAdmin && !this.isOperator);
       
-      // Si es cliente, su ID para el formulario es su propio correo
       if (this.isCustomer) {
         this.nuevoCliente = this.userEmail;
       }
@@ -57,7 +57,6 @@ export class OrdersComponent implements OnInit {
   cargarPedidos() {
     let endpoint = 'http://localhost:8080/api/bff/orders';
     
-    // Redirección inteligente según el rol
     if (this.isCustomer) {
       endpoint = 'http://localhost:8080/api/bff/orders/me';
     } else if (this.isOperator) {
@@ -70,14 +69,31 @@ export class OrdersComponent implements OnInit {
     });
   }
 
+  cargarProductos() {
+    // Obtenemos los productos disponibles desde el BFF de catálogo
+    this.http.get<any[]>('http://localhost:8080/api/bff/catalog/products').subscribe({
+      next: (data) => this.productosDisponibles = data || [],
+      error: (err) => console.error('Error cargando catálogo para pedidos:', err)
+    });
+  }
+
+  onProductoChange() {
+    // Autocompleta el precio total al seleccionar un producto
+    const prod = this.productosDisponibles.find(p => p.id === Number(this.productoSeleccionadoId));
+    if (prod) {
+      this.nuevoTotal = prod.precio || prod.price || 0;
+    }
+  }
+
   guardarPedido() {
-    if (!this.nuevoCliente || !this.nuevoTotal) {
-      this.mostrarNotificacion('Por favor completa todos los campos.');
+    if (!this.nuevoCliente || !this.productoSeleccionadoId || !this.nuevoTotal) {
+      this.mostrarNotificacion('Por favor completa todos los campos y selecciona un producto.');
       return;
     }
 
     const payload = {
       customerId: this.nuevoCliente.trim(),
+      productId: Number(this.productoSeleccionadoId),
       total: this.nuevoTotal
     };
 
@@ -86,10 +102,10 @@ export class OrdersComponent implements OnInit {
         this.cargarPedidos();
         this.mostrarNotificacion(`¡Pedido creado con éxito!`);
         
-        // Limpiamos el formulario (pero si es cliente, mantenemos su correo)
         if (!this.isCustomer) {
           this.nuevoCliente = '';
         }
+        this.productoSeleccionadoId = null;
         this.nuevoTotal = null;
         this.mostrarFormulario = false;
       },
