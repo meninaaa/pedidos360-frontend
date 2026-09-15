@@ -22,7 +22,7 @@ export interface PuntoLeadTime {
 
 @Injectable({ providedIn: 'root' })
 export class ReportService {
-  private baseUrl = 'http://localhost:8080/api/bff/reports';
+  private baseUrl = 'https://3lgyldt561.execute-api.us-east-1.amazonaws.com/api/bff/reports';
 
   constructor(private http: HttpClient) {}
 
@@ -39,6 +39,6 @@ export class ReportService {
   }
 
   getTopProductos() {
-  return this.http.get<any[]>('http://localhost:8080/api/bff/reports/top-productos');
+  return this.http.get<any[]>('https://3lgyldt561.execute-api.us-east-1.amazonaws.com/api/bff/reports/top-productos');
 }
 }
