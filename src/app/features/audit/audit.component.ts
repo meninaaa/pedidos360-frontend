@@ -23,7 +23,7 @@ export class AuditComponent implements OnInit {
   }
 
   cargarEventos() {
-    this.http.get<any[]>('http://localhost:8080/api/bff/audit').subscribe({
+    this.http.get<any[]>('https://3lgyldt561.execute-api.us-east-1.amazonaws.com/api/bff/audit').subscribe({
       next: (res) => {
         // Ordenamos para que los registros más nuevos (por ID descendente o fecha) queden arriba
         const lista = res || [];

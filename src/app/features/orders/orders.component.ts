@@ -26,7 +26,8 @@ export class OrdersComponent implements OnInit {
   }
 
   cargarPedidos() {
-    this.http.get<any[]>('http://localhost:8080/api/bff/orders').subscribe({
+    // Si es cliente, llamamos a /me. (O puedes verificar el rol aquí mismo)
+    this.http.get<any[]>('https://3lgyldt561.execute-api.us-east-1.amazonaws.com/api/bff/orders/me').subscribe({
       next: (data) => this.pedidos = data || [],
       error: (err) => console.error('Error cargando pedidos:', err)
     });
@@ -43,7 +44,7 @@ export class OrdersComponent implements OnInit {
       total: this.nuevoTotal
     };
 
-    this.http.post('http://localhost:8080/api/bff/orders', payload).subscribe({
+    this.http.post('https://3lgyldt561.execute-api.us-east-1.amazonaws.com/api/bff/orders', payload).subscribe({
       next: () => {
         this.cargarPedidos();
         this.mostrarNotificacion(`¡Pedido para ${this.nuevoCliente} creado con éxito!`);
@@ -60,7 +61,7 @@ export class OrdersComponent implements OnInit {
   }
 
   cambiarEstado(id: number, nuevoEstado: string) {
-    this.http.put(`http://localhost:8080/api/bff/orders/${id}/status?nuevoEstado=${nuevoEstado}`, {}).subscribe({
+    this.http.put(`https://3lgyldt561.execute-api.us-east-1.amazonaws.com/api/bff/orders/${id}/status?nuevoEstado=${nuevoEstado}`, {}).subscribe({
       next: () => {
         this.cargarPedidos();
         this.mostrarNotificacion(`Pedido #${id} actualizado a ${nuevoEstado}.`);

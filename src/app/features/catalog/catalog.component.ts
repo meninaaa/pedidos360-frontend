@@ -24,7 +24,7 @@ export class CatalogComponent implements OnInit {
   }
 
   cargarCatalogo() {
-    this.http.get<any[]>('http://localhost:8080/api/bff/catalog/products').subscribe({
+    this.http.get<any[]>('https://3lgyldt561.execute-api.us-east-1.amazonaws.com/api/bff/catalog/products').subscribe({
       next: (res) => {
         this.productos = res || [];
       },
@@ -54,7 +54,7 @@ export class CatalogComponent implements OnInit {
 
   guardarProducto() {
     if (this.modoEdicion) {
-      this.http.put(`http://localhost:8080/api/bff/catalog/products/${this.productoActual.id}`, this.productoActual).subscribe({
+      this.http.put(`https://3lgyldt561.execute-api.us-east-1.amazonaws.com/api/bff/catalog/products/${this.productoActual.id}`, this.productoActual).subscribe({
         next: () => {
           this.cargarCatalogo();
           this.cerrarModal();
@@ -65,7 +65,7 @@ export class CatalogComponent implements OnInit {
         }
       });
     } else {
-      this.http.post('http://localhost:8080/api/bff/catalog/products', this.productoActual).subscribe({
+      this.http.post('https://3lgyldt561.execute-api.us-east-1.amazonaws.com/api/bff/catalog/products', this.productoActual).subscribe({
         next: () => {
           this.cargarCatalogo();
           this.cerrarModal();
@@ -81,7 +81,7 @@ export class CatalogComponent implements OnInit {
 
   eliminarProducto(id: number) {
     if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
-      this.http.delete(`http://localhost:8080/api/bff/catalog/products/${id}`).subscribe({
+      this.http.delete(`https://3lgyldt561.execute-api.us-east-1.amazonaws.com/api/bff/catalog/products/${id}`).subscribe({
         next: () => {
           this.cargarCatalogo(); // Recarga la tabla tras eliminar
         },
