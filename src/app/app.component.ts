@@ -1,65 +1,72 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { MsalService, MsalBroadcastService, MSAL_GUARD_CONFIG, MsalGuardConfiguration } from '@azure/msal-angular';
-import { InteractionStatus, RedirectRequest } from '@azure/msal-browser';
-import { filter } from 'rxjs/operators';
-import { HttpClient } from '@angular/common/http';
+import { InteractionStatus, RedirectRequest, EventMessage, EventType } from '@azure/msal-browser';
+import { Subject } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit {
-  title = 'Pedidos360';
-  loginDisplay = false;
-  respuestaBackend: string = '';
-  
-  // Variable añadida para controlar la navegación del menú lateral
-  vistaActual: string = 'dashboard';
+export class AppComponent implements OnInit, OnDestroy {
+  isLoggedIn = false;
+  private readonly _destroying$ = new Subject<void>();
 
   constructor(
     @Inject(MSAL_GUARD_CONFIG) private msalGuardConfig: MsalGuardConfiguration,
     private authService: MsalService,
     private msalBroadcastService: MsalBroadcastService,
-    private http: HttpClient
+    private router: Router
   ) {}
 
   ngOnInit(): void {
+    // 1. Manejar la redirección de MSAL (crítico para que no se quede pegado)
     this.authService.handleRedirectObservable().subscribe();
-    this.msalBroadcastService.inProgress$
-      .pipe(filter((status: InteractionStatus) => status === InteractionStatus.None))
+
+    // 2. Escuchar cuando el login fue exitoso y redirigir al dashboard
+    this.msalBroadcastService.msalSubject$
+      .pipe(
+        filter((msg: EventMessage) => msg.eventType === EventType.LOGIN_SUCCESS),
+        takeUntil(this._destroying$)
+      )
       .subscribe(() => {
-        this.loginDisplay = this.authService.instance.getAllAccounts().length > 0;
+        this.checkAndSetActiveAccount();
+        this.router.navigate(['/dashboard']);
+      });
+
+    // 3. Mantener el estado de isLoggedIn sincronizado
+    this.msalBroadcastService.inProgress$
+      .pipe(
+        filter((status: InteractionStatus) => status === InteractionStatus.None),
+        takeUntil(this._destroying$)
+      )
+      .subscribe(() => {
+        this.checkAndSetActiveAccount();
       });
   }
 
-  login() {
-    if (this.msalGuardConfig.authRequest) {
-      this.authService.loginRedirect({ ...this.msalGuardConfig.authRequest } as RedirectRequest);
-    } else {
-      this.authService.loginRedirect();
+  checkAndSetActiveAccount() {
+    let activeAccount = this.authService.instance.getActiveAccount();
+    
+    if (!activeAccount && this.authService.instance.getAllAccounts().length > 0) {
+      let accounts = this.authService.instance.getAllAccounts();
+      this.authService.instance.setActiveAccount(accounts[0]);
     }
+    
+    this.isLoggedIn = this.authService.instance.getAllAccounts().length > 0;
   }
 
   logout() {
     this.authService.logoutRedirect();
   }
 
-  pedidos: any[] = [];
-
-  llamarAlBackend() {
-    this.http.get<any>('https://j2aqelnuei.execute-api.us-east-1.amazonaws.com/api/estado').subscribe({
-      next: (res) => {
-        console.log("DATOS RECIBIDOS:", res);
-        this.pedidos = res; 
-      },
-      error: (err) => {
-        console.error('ERROR DE CONEXIÓN:', err);
-      }
-    });
+  ngOnDestroy(): void {
+    this._destroying$.next(undefined);
+    this._destroying$.complete();
   }
 }

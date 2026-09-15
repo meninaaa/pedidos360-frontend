@@ -1,138 +1,34 @@
-<!-- PANTALLA DE LOGIN -->
-<div class="login-layout" *ngIf="!loginDisplay">
-  <div class="login-panel">
-    <div class="brand">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="brand-icon"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-      <h2>Pedidos360</h2>
-    </div>
-    <p class="login-desc">Portal de Gestión de Operaciones Logísticas</p>
-    <button class="btn-sso" (click)="login()">
-      <svg width="18" height="18" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
-        <path d="M0 0h10v10H0z" fill="#f25022"/><path d="M11 0h10v10H11z" fill="#7fba00"/>
-        <path d="M0 11h10v10H0z" fill="#00a4ef"/><path d="M11 11h10v10H11z" fill="#ffb900"/>
-      </svg>
-      Continuar con Microsoft Entra ID
-    </button>
-  </div>
-</div>
+<ng-container *ngIf="!isLoggedIn">
+  <router-outlet></router-outlet>
+</ng-container>
 
-<!-- PORTAL INTERNO -->
-<div class="admin-layout" *ngIf="loginDisplay">
-  
-  <!-- BARRA LATERAL (SIDEBAR) -->
+<div *ngIf="isLoggedIn" class="app-layout">
+  <!-- Sidebar de Navegación -->
   <aside class="sidebar">
-    <div class="sidebar-header">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="brand-icon-small"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-      <span>Pedidos360</span>
+    <div class="brand">
+      <span class="brand-icon">⬡</span> Pedidos360
     </div>
-    <nav class="sidebar-nav">
-      <a class="nav-item" [class.active]="vistaActual === 'dashboard'" (click)="vistaActual = 'dashboard'">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-        Panel General
-      </a>
-      <a class="nav-item" [class.active]="vistaActual === 'pedidos'" (click)="vistaActual = 'pedidos'">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-        Gestión de Pedidos
-      </a>
+    
+    <nav class="nav-menu">
+      <a routerLink="/dashboard" routerLinkActive="active-link" class="nav-link">Panel General</a>
+      <a routerLink="/orders" routerLinkActive="active-link" class="nav-link">Gestión de Pedidos</a>
+      <a routerLink="/catalog" routerLinkActive="active-link" class="nav-link">Catálogo de Productos</a>
+      <a routerLink="/reports" routerLinkActive="active-link" class="nav-link">Reportería</a>
+      <a routerLink="/audit" routerLinkActive="active-link" class="nav-link">Auditoría (Timeline)</a>
     </nav>
   </aside>
 
-  <!-- CONTENEDOR PRINCIPAL -->
-  <div class="main-content">
-    
-    <!-- BARRA SUPERIOR (HEADER) -->
-    <header class="topbar">
-      <div class="user-info">
+  <!-- Área Principal -->
+  <div class="main-wrapper">
+    <header class="top-header">
+      <div class="header-status">
         <span class="status-dot"></span> Sesión activa (MSAL)
       </div>
-      <button class="btn-text-danger" (click)="logout()">
-        Cerrar Sesión
-      </button>
+      <button class="logout-btn" (click)="logout()">Cerrar Sesión</button>
     </header>
 
-    <!-- ÁREA DE VISTAS -->
     <main class="content-area">
-      
-      <!-- VISTA 1: DASHBOARD / RESUMEN -->
-      <div *ngIf="vistaActual === 'dashboard'" class="view-section">
-        <h1 class="page-title">Resumen de Operaciones</h1>
-        <p class="page-subtitle">Indicadores clave de rendimiento (KPIs) del sistema central.</p>
-        
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <span class="kpi-label">Total Pedidos en Sistema</span>
-            <span class="kpi-value">{{ pedidos.length > 0 ? pedidos.length : '--' }}</span>
-          </div>
-          <div class="kpi-card">
-            <span class="kpi-label">Estado de Conexión BFF</span>
-            <span class="kpi-value status-ok">Operativo</span>
-          </div>
-          <div class="kpi-card">
-            <span class="kpi-label">Base de Datos</span>
-            <span class="kpi-value status-ok">H2 (In-Memory)</span>
-          </div>
-        </div>
-
-        <div class="empty-state" style="margin-top: 30px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1" width="48" height="48"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-          <h4>Monitoreo Activo</h4>
-          <p>Diríjase a la pestaña "Gestión de Pedidos" para sincronizar y visualizar los registros.</p>
-        </div>
-      </div>
-
-      <!-- VISTA 2: TABLA DE PEDIDOS -->
-      <div *ngIf="vistaActual === 'pedidos'" class="view-section">
-        <div class="table-header-row">
-          <div>
-            <h1 class="page-title">Registros Logísticos</h1>
-            <p class="page-subtitle">Sincronización directa con el microservicio a través del BFF.</p>
-          </div>
-          <button class="btn-primary" (click)="llamarAlBackend()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-            Sincronizar Datos
-          </button>
-        </div>
-
-        <!-- Estado Vacío Tabla -->
-        <div class="empty-state" *ngIf="pedidos.length === 0">
-          <p>No hay datos sincronizados en memoria local.</p>
-          <details class="debug-panel">
-            <summary>Ver traza de red (Debug)</summary>
-            <pre>{{ pedidos | json }}</pre>
-          </details>
-        </div>
-
-        <!-- Tabla de Datos -->
-        <div class="table-card" *ngIf="pedidos.length > 0">
-          <table class="corporate-table">
-            <thead>
-              <tr>
-                <th>Identificador</th>
-                <th>Producto / Artículo</th>
-                <th>Estado Actual</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let p of pedidos">
-                <td class="col-id">#{{ p.id }}</td>
-                <td class="col-product">{{ p.producto }}</td>
-                <td>
-                  <span class="status-badge" 
-                        [ngClass]="{
-                          'status-success': p.estado === 'Entregado',
-                          'status-warning': p.estado === 'En preparación' || p.estado === 'Pendiente de pago',
-                          'status-info': p.estado === 'En tránsito',
-                          'status-danger': p.estado === 'Cancelado'
-                        }">
-                    {{ p.estado }}
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
+      <router-outlet></router-outlet>
     </main>
   </div>
 </div>

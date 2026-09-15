@@ -1,0 +1,115 @@
+<div class="dashboard-wrapper">
+  <header class="dashboard-header">
+    <div class="header-info">
+      <h2>Panel General</h2>
+      <span class="user-role">{{ userRoles.join(', ') || 'Usuario' }}</span>
+    </div>
+    <div class="user-greeting">
+      <span>{{ userName }}</span>
+    </div>
+  </header>
+
+  <main class="dashboard-content">
+
+    <!-- Admin: KPIs globales -->
+    <section *ngIf="isAdmin" class="role-module">
+      <div class="module-header">
+        <h3>Resumen Ejecutivo</h3>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-label">Ventas Totales</span>
+          <span class="metric-value">{{ resumenAdmin.ventasTotales | currency:'CLP' }}</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Pedidos Activos</span>
+          <span class="metric-value">{{ resumenAdmin.pedidosActivos }}</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Usuarios Activos</span>
+          <span class="metric-value">{{ resumenAdmin.usuariosActivos }}</span>
+        </div>
+      </div>
+      <p class="module-link">
+        <a routerLink="/reports">Ver reportería completa y gráficos →</a>
+      </p>
+    </section>
+
+    <!-- Operator: pedidos en curso y pendientes -->
+    <section *ngIf="isOperator" class="role-module mt-4">
+      <div class="module-header">
+        <h3>Pedidos en curso y pendientes</h3>
+      </div>
+      
+      <!-- Contenedor limpio estilo tarjeta -->
+      <div style="background: white; border: 1px solid #eaeaea; border-radius: 8px; padding: 24px; margin-top: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+        <table class="orders-table" *ngIf="pedidosOperador.length > 0; else sinPendientes" style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 2px solid #f0f0f0;">
+              <th style="padding: 12px 8px; color: #555; font-weight: 600;">ID Pedido</th>
+              <th style="padding: 12px 8px; color: #555; font-weight: 600;">Cliente</th>
+              <th style="padding: 12px 8px; color: #555; font-weight: 600;">Estado</th>
+              <th style="padding: 12px 8px; color: #555; font-weight: 600; text-align: right;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of pedidosOperador" style="border-bottom: 1px solid #f9f9f9;">
+              <td style="padding: 16px 8px; font-weight: 500; color: #333;">#{{ p.id }}</td>
+              <td style="padding: 16px 8px; color: #555;">{{ p.customerId }}</td>
+              <td style="padding: 16px 8px; font-weight: 500; color: #0056b3;">{{ p.status }}</td>
+              <td style="padding: 16px 8px; text-align: right; color: #333; font-weight: 500;">{{ p.total | currency:'CLP':'symbol-narrow' }}</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <ng-template #sinPendientes>
+          <div style="text-align: center; padding: 30px 0; color: #888;">
+            <p style="margin: 0; font-size: 15px;">No hay pedidos pendientes en este momento.</p>
+          </div>
+        </ng-template>
+
+        <div style="text-align: right; margin-top: 24px;">
+          <button class="action-btn" routerLink="/orders">Gestionar Pedidos</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Customer: últimos pedidos y estado actual -->
+    <section *ngIf="isCustomer" class="role-module mt-4">
+      <div class="module-header">
+        <h3>Mis últimos pedidos</h3>
+      </div>
+      
+      <!-- Contenedor limpio estilo tarjeta -->
+      <div style="background: white; border: 1px solid #eaeaea; border-radius: 8px; padding: 24px; margin-top: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+        <table class="orders-table" *ngIf="pedidosCliente.length > 0; else sinPedidos" style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 2px solid #f0f0f0;">
+              <th style="padding: 12px 8px; color: #555; font-weight: 600;">ID Pedido</th>
+              <th style="padding: 12px 8px; color: #555; font-weight: 600;">Estado</th>
+              <th style="padding: 12px 8px; color: #555; font-weight: 600; text-align: right;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of pedidosCliente" style="border-bottom: 1px solid #f9f9f9;">
+              <td style="padding: 16px 8px; font-weight: 500; color: #333;">#{{ p.id }}</td>
+              <td style="padding: 16px 8px; font-weight: 500; color: #0f5132;">{{ p.status }}</td>
+              <td style="padding: 16px 8px; text-align: right; color: #333; font-weight: 500;">{{ p.total | currency:'CLP':'symbol-narrow' }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <ng-template #sinPedidos>
+          <div style="text-align: center; padding: 30px 0; color: #888;">
+            <p style="margin: 0; font-size: 15px;">Aún no tienes pedidos registrados.</p>
+          </div>
+        </ng-template>
+
+        <div style="text-align: right; margin-top: 24px;">
+          <button class="action-btn" routerLink="/orders">Ver Historial</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>

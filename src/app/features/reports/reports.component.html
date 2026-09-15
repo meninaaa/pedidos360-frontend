@@ -1,0 +1,45 @@
+<div style="padding: 30px; background-color: #f4f7f6; min-height: calc(100vh - 60px);">
+  <div style="margin-bottom: 25px;">
+    <h2 style="margin: 0; font-size: 22px; color: #1a1a1a;">Centro de Inteligencia (BI)</h2>
+    <p style="color: #666; font-size: 14px; margin-top: 5px;">Métricas en tiempo real alimentadas por Kafka</p>
+  </div>
+
+  <!-- KPIs -->
+  <div style="display: flex; gap: 20px; margin-bottom: 30px; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 250px; background: white; padding: 20px; border-radius: 8px; border-top: 4px solid #16a34a; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+      <span style="display: block; font-size: 11px; font-weight: 600; color: #586069; text-transform: uppercase; margin-bottom: 5px;">Promedio Lead Time</span>
+      <span style="font-size: 28px; font-weight: 600; color: #24292e;">{{ resumen.promedioLeadTime | number:'1.1-1' }} Horas</span>
+    </div>
+    <div style="flex: 1; min-width: 250px; background: white; padding: 20px; border-radius: 8px; border-top: 4px solid #0366d6; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+      <span style="display: block; font-size: 11px; font-weight: 600; color: #586069; text-transform: uppercase; margin-bottom: 5px;">Pedidos Activos</span>
+      <span style="font-size: 28px; font-weight: 600; color: #24292e;">{{ resumen.pedidosActivos }}</span>
+    </div>
+    <div style="flex: 1; min-width: 250px; background: white; padding: 20px; border-radius: 8px; border-top: 4px solid #8a2be2; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+      <span style="display: block; font-size: 11px; font-weight: 600; color: #586069; text-transform: uppercase; margin-bottom: 5px;">Ventas Totales</span>
+      <span style="font-size: 28px; font-weight: 600; color: #24292e;">{{ resumen.ventasTotales | currency:'CLP' }}</span>
+    </div>
+  </div>
+
+  <!-- Gráficos -->
+  <div style="display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 400px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden;">
+      <h3 style="margin: 0 0 15px 0; font-size: 16px;">Ventas por Hora</h3>
+      <div style="width: 100%;">
+        <app-sales-chart [datos]="ventasPorHora"></app-sales-chart>
+      </div>
+    </div>
+
+    <div style="flex: 1; min-width: 400px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden;">
+      <h3 style="margin: 0 0 15px 0; font-size: 16px;">Lead Time por Pedido</h3>
+      <div style="width: 100%;">
+        <app-lead-time-chart [datos]="leadTimeTrend"></app-lead-time-chart>
+      </div>
+    </div>
+  </div>
+
+  <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+    <h3 style="margin: 0 0 15px 0; font-size: 16px;">Top Productos</h3>
+    <!-- Inyectamos los datos reales simulados desde el backend -->
+    <app-top-products-chart [datos]="topProducts"></app-top-products-chart>
+  </div>
+</div>
