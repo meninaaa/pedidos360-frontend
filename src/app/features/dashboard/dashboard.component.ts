@@ -60,7 +60,7 @@ export class DashboardComponent implements OnInit {
   }
 
   cargarResumenAdmin() {
-    this.http.get<any>('https://3lgyldt561.execute-api.us-east-1.amazonaws.com/api/bff/reports/summary').subscribe({
+    this.http.get<any>('http://localhost:8080/api/bff/reports/summary').subscribe({
       next: (data) => {
         this.resumenAdmin.ventasTotales = data.ventasTotales;
         this.resumenAdmin.pedidosActivos = data.pedidosActivos;
@@ -68,7 +68,7 @@ export class DashboardComponent implements OnInit {
       error: (err) => console.error('Error cargando resumen admin:', err)
     });
 
-    this.http.get<Pedido[]>('https://3lgyldt561.execute-api.us-east-1.amazonaws.com/api/bff/orders').subscribe({
+    this.http.get<Pedido[]>('http://localhost:8080/api/bff/orders').subscribe({
       next: (pedidos) => {
         const clientesUnicos = new Set(pedidos.map(p => p.customerId));
         this.resumenAdmin.usuariosActivos = clientesUnicos.size;
@@ -78,14 +78,14 @@ export class DashboardComponent implements OnInit {
   }
 
   cargarPedidosOperador() {
-    this.http.get<Pedido[]>('https://3lgyldt561.execute-api.us-east-1.amazonaws.com/api/bff/orders/pending').subscribe({
+    this.http.get<Pedido[]>('http://localhost:8080/api/bff/orders/pending').subscribe({
       next: (pedidos) => this.pedidosOperador = pedidos,
       error: (err) => console.error('Error cargando pedidos pendientes:', err)
     });
   }
 
   cargarPedidosCliente() {
-    this.http.get<Pedido[]>('https://3lgyldt561.execute-api.us-east-1.amazonaws.com/api/bff/orders/me').subscribe({
+    this.http.get<Pedido[]>('http://localhost:8080/api/bff/orders/me').subscribe({
       next: (pedidos) => this.pedidosCliente = pedidos,
       error: (err) => console.error('Error cargando mis pedidos:', err)
     });

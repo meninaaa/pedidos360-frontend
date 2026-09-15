@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { MsalService } from '@azure/msal-angular';
 
 @Component({
   selector: 'app-catalog',
@@ -13,18 +14,33 @@ import { FormsModule } from '@angular/forms';
 export class CatalogComponent implements OnInit {
   productos: any[] = [];
   
+  // Variable de rol requerida por el HTML para ocultar/mostrar opciones de administración
+  isAdmin: boolean = false;
+  
   mostrarModal = false;
   modoEdicion = false;
   productoActual: any = { id: null, nombre: '', precio: 0, stock: 0, estado: 'DISPONIBLE' };
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private msalService: MsalService) {}
 
   ngOnInit(): void {
+    this.verificarRol();
     this.cargarCatalogo();
   }
 
+  verificarRol() {
+    const accounts = this.msalService.instance.getAllAccounts();
+    if (accounts.length > 0) {
+      const account = accounts[0];
+      const claims: any = account.idTokenClaims;
+      const roles = claims?.roles || []; 
+
+      this.isAdmin = roles.includes('Administrador') || roles.includes('Admin');
+    }
+  }
+
   cargarCatalogo() {
-    this.http.get<any[]>('https://3lgyldt561.execute-api.us-east-1.amazonaws.com/api/bff/catalog/products').subscribe({
+    this.http.get<any[]>('http://localhost:8080/api/bff/catalog/products').subscribe({
       next: (res) => {
         this.productos = res || [];
       },
@@ -54,7 +70,7 @@ export class CatalogComponent implements OnInit {
 
   guardarProducto() {
     if (this.modoEdicion) {
-      this.http.put(`https://3lgyldt561.execute-api.us-east-1.amazonaws.com/api/bff/catalog/products/${this.productoActual.id}`, this.productoActual).subscribe({
+      this.http.put(`http://localhost:8080/api/bff/catalog/products/${this.productoActual.id}`, this.productoActual).subscribe({
         next: () => {
           this.cargarCatalogo();
           this.cerrarModal();
@@ -65,7 +81,7 @@ export class CatalogComponent implements OnInit {
         }
       });
     } else {
-      this.http.post('https://3lgyldt561.execute-api.us-east-1.amazonaws.com/api/bff/catalog/products', this.productoActual).subscribe({
+      this.http.post('http://localhost:8080/api/bff/catalog/products', this.productoActual).subscribe({
         next: () => {
           this.cargarCatalogo();
           this.cerrarModal();
@@ -78,10 +94,9 @@ export class CatalogComponent implements OnInit {
     }
   }
 
-
   eliminarProducto(id: number) {
     if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
-      this.http.delete(`https://3lgyldt561.execute-api.us-east-1.amazonaws.com/api/bff/catalog/products/${id}`).subscribe({
+      this.http.delete(`http://localhost:8080/api/bff/catalog/products/${id}`).subscribe({
         next: () => {
           this.cargarCatalogo(); // Recarga la tabla tras eliminar
         },

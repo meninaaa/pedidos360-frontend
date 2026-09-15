@@ -10,11 +10,21 @@
     </div>
     
     <nav class="nav-menu">
+      <!-- Panel General: Visible para todos -->
       <a routerLink="/dashboard" routerLinkActive="active-link" class="nav-link">Panel General</a>
-      <a routerLink="/orders" routerLinkActive="active-link" class="nav-link">Gestión de Pedidos</a>
-      <a routerLink="/catalog" routerLinkActive="active-link" class="nav-link">Catálogo de Productos</a>
-      <a routerLink="/reports" routerLinkActive="active-link" class="nav-link">Reportería</a>
-      <a routerLink="/audit" routerLinkActive="active-link" class="nav-link">Auditoría (Timeline)</a>
+      
+      <!-- Gestión Interna: Solo Admin y Operador -->
+      <a *ngIf="isAdmin || isOperator" routerLink="/orders" routerLinkActive="active-link" class="nav-link">Gestión de Pedidos</a>
+      
+      <!-- Vista Cliente: Solo ve SUS pedidos -->
+      <a *ngIf="isCustomer" routerLink="/orders" routerLinkActive="active-link" class="nav-link">Mis Pedidos</a>
+      
+      <!-- Catálogo: Cliente (para comprar) y Admin (para gestionar) -->
+      <a *ngIf="isAdmin || isCustomer" routerLink="/catalog" routerLinkActive="active-link" class="nav-link">Catálogo de Productos</a>
+      
+      <!-- Reportería y Auditoría: Exclusivo del Administrador -->
+      <a *ngIf="isAdmin" routerLink="/reports" routerLinkActive="active-link" class="nav-link">Reportería</a>
+      <a *ngIf="isAdmin" routerLink="/audit" routerLinkActive="active-link" class="nav-link">Auditoría (Timeline)</a>
     </nav>
   </aside>
 

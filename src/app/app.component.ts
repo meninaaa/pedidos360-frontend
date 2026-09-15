@@ -15,6 +15,12 @@ import { filter, takeUntil } from 'rxjs/operators';
 })
 export class AppComponent implements OnInit, OnDestroy {
   isLoggedIn = false;
+  
+  // Variables para ocultar/mostrar el menú lateral dinámicamente
+  isAdmin = false;
+  isOperator = false;
+  isCustomer = false;
+
   private readonly _destroying$ = new Subject<void>();
 
   constructor(
@@ -56,9 +62,27 @@ export class AppComponent implements OnInit, OnDestroy {
     if (!activeAccount && this.authService.instance.getAllAccounts().length > 0) {
       let accounts = this.authService.instance.getAllAccounts();
       this.authService.instance.setActiveAccount(accounts[0]);
+      activeAccount = accounts[0]; // Actualizamos la referencia local
     }
     
     this.isLoggedIn = this.authService.instance.getAllAccounts().length > 0;
+
+    // 4. Leer los roles del token para adaptar el menú
+    if (this.isLoggedIn && activeAccount) {
+      const claims: any = activeAccount.idTokenClaims;
+      const roles = claims?.roles || []; 
+
+      this.isAdmin = roles.includes('Administrador') || roles.includes('Admin');
+      this.isOperator = roles.includes('Operador de Logística') || roles.includes('Operador');
+      
+      // Si no es admin ni operador, asumimos que es el cliente
+      this.isCustomer = roles.includes('Cliente') || roles.includes('Customer') || (!this.isAdmin && !this.isOperator);
+    } else {
+      // Si no hay sesión, apagamos todo por seguridad
+      this.isAdmin = false;
+      this.isOperator = false;
+      this.isCustomer = false;
+    }
   }
 
   logout() {

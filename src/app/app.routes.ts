@@ -10,7 +10,7 @@ import { ReportsComponent } from './features/reports/reports.component';
 import { AuditComponent } from './features/audit/audit.component';
 
 export const routes: Routes = [
-  // Ruta por defecto redirige al login si no hay sesión, o al dashboard si la hay (manejado por el guard)
+  // Ruta por defecto redirige al login si no hay sesión, o al dashboard si la hay
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   
   // Login es público
@@ -21,10 +21,36 @@ export const routes: Routes = [
 
   // Rutas Privadas
   { path: 'dashboard', component: DashboardComponent, canActivate: [MsalGuard] },
-  { path: 'orders', component: OrdersComponent, canActivate: [MsalGuard, RoleGuard], data: { roles: ['Admin', 'Operator', 'Customer'] } },
-  { path: 'catalog', component: CatalogComponent, canActivate: [MsalGuard, RoleGuard], data: { roles: ['Admin', 'Operator'] } },
-  { path: 'reports', component: ReportsComponent, canActivate: [MsalGuard, RoleGuard], data: { roles: ['Admin'] } },
-  { path: 'audit', component: AuditComponent, canActivate: [MsalGuard, RoleGuard], data: { roles: ['Admin'] } },
+  
+  // Gestión de pedidos (Tienen acceso los 3, usando los nombres exactos de Azure)
+  { 
+    path: 'orders', 
+    component: OrdersComponent, 
+    canActivate: [MsalGuard, RoleGuard], 
+    data: { roles: ['Administrador', 'Admin', 'Operador de Logística', 'Operador', 'Cliente', 'Customer'] } 
+  },
+  
+  // Catálogo (Tienen acceso el Admin para gestionar y el Cliente para comprar)
+  { 
+    path: 'catalog', 
+    component: CatalogComponent, 
+    canActivate: [MsalGuard, RoleGuard], 
+    data: { roles: ['Administrador', 'Admin', 'Cliente', 'Customer'] } 
+  },
+  
+  // Reportería y Auditoría (Solo Admin)
+  { 
+    path: 'reports', 
+    component: ReportsComponent, 
+    canActivate: [MsalGuard, RoleGuard], 
+    data: { roles: ['Administrador', 'Admin'] } 
+  },
+  { 
+    path: 'audit', 
+    component: AuditComponent, 
+    canActivate: [MsalGuard, RoleGuard], 
+    data: { roles: ['Administrador', 'Admin'] } 
+  },
   
   { path: '**', redirectTo: '/login' }
 ];

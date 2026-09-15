@@ -11,8 +11,13 @@
 <div style="padding: 30px; background-color: #f4f7f6; min-height: calc(100vh - 60px);">
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
     <div>
-      <h2 style="margin: 0; font-size: 22px; color: #1a1a1a;">Gestión de Pedidos</h2>
-      <p style="color: #666; font-size: 14px; margin-top: 5px;">Seguimiento y control de despachos logísticos</p>
+      <!-- Título Dinámico -->
+      <h2 style="margin: 0; font-size: 22px; color: #1a1a1a;">
+        {{ isCustomer ? 'Mis Pedidos' : 'Gestión de Pedidos' }}
+      </h2>
+      <p style="color: #666; font-size: 14px; margin-top: 5px;">
+        {{ isCustomer ? 'Historial y seguimiento de tus compras' : 'Seguimiento y control de despachos logísticos' }}
+      </p>
     </div>
     <!-- Botón para alternar la visibilidad del formulario en la página -->
     <button (click)="mostrarFormulario = !mostrarFormulario" style="background: #0366d6; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: 500; cursor: pointer;">
@@ -26,7 +31,11 @@
     <div style="display: flex; gap: 15px; flex-wrap: wrap;">
       <div style="flex: 1; min-width: 250px;">
         <label style="display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; color: #586069;">Cliente / Empresa:</label>
-        <input type="text" [(ngModel)]="nuevoCliente" placeholder="Ej. Empresa Alpha S.A." style="width: 100%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+        <!-- Campo deshabilitado (bloqueado) si el usuario es un Cliente -->
+        <input type="text" [(ngModel)]="nuevoCliente" [disabled]="isCustomer" 
+               [ngStyle]="{'background-color': isCustomer ? '#f3f4f6' : 'white', 'cursor': isCustomer ? 'not-allowed' : 'text'}"
+               placeholder="Ej. Empresa Alpha S.A." 
+               style="width: 100%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
       </div>
       <div style="flex: 1; min-width: 250px;">
         <label style="display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; color: #586069;">Total (CLP):</label>
@@ -65,15 +74,20 @@
               {{ pedido.status | uppercase }}
             </span>
           </td>
-          <td style="padding: 15px 20px; border-bottom: 1px solid #e1e4e8;">
-            <button *ngIf="pedido.status === 'CREADO'" style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer;" (click)="cambiarEstado(pedido.id, 'ACEPTADO')">Aceptar</button>
-            <button *ngIf="pedido.status === 'ACEPTADO'" style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer;" (click)="cambiarEstado(pedido.id, 'EN_PREPARACION')">Preparar</button>
-            <button *ngIf="pedido.status === 'EN_PREPARACION'" style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer;" (click)="cambiarEstado(pedido.id, 'DESPACHADO')">Despachar</button>
-            <button *ngIf="pedido.status === 'DESPACHADO' || pedido.status === 'ENTREGADO' || pedido.status === 'CANCELADO'" style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Ver</button>
+          <td style="padding: 15px 20px; border-bottom: 1px solid #e1e4e8; display: flex; gap: 8px;">
+            <!-- Controles de Operador/Admin: Solo se muestran si NO es Cliente -->
+            <ng-container *ngIf="!isCustomer">
+              <button *ngIf="pedido.status === 'CREADO'" style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer; color: #0366d6;" (click)="cambiarEstado(pedido.id, 'ACEPTADO')">Aceptar</button>
+              <button *ngIf="pedido.status === 'ACEPTADO'" style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer; color: #e65100;" (click)="cambiarEstado(pedido.id, 'EN_PREPARACION')">Preparar</button>
+              <button *ngIf="pedido.status === 'EN_PREPARACION'" style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer; color: #1e8e3e;" (click)="cambiarEstado(pedido.id, 'DESPACHADO')">Despachar</button>
+            </ng-container>
+            
+            <!-- Botón genérico para ver, visible siempre o al final del flujo -->
+            <button *ngIf="isCustomer || pedido.status === 'DESPACHADO' || pedido.status === 'ENTREGADO' || pedido.status === 'CANCELADO'" style="background: transparent; border: 1px solid #e1e4e8; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Ver Detalle</button>
           </td>
         </tr>
         <tr *ngIf="pedidos.length === 0">
-          <td colspan="6" style="padding: 30px; text-align: center; color: #6a737d; font-style: italic;">Consultando base de datos Oracle o no hay pedidos registrados...</td>
+          <td colspan="6" style="padding: 30px; text-align: center; color: #6a737d; font-style: italic;">No hay pedidos registrados aún...</td>
         </tr>
       </tbody>
     </table>
