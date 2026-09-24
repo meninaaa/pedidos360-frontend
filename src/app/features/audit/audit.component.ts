@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-audit',
@@ -23,16 +24,13 @@ export class AuditComponent implements OnInit {
   }
 
   cargarEventos() {
-    this.http.get<any[]>('http://localhost:8080/api/bff/audit').subscribe({
+    this.http.get<any[]>(`${environment.apiUrl}/audit`).subscribe({
       next: (res) => {
-        // Ordenamos para que los registros más nuevos (por ID descendente o fecha) queden arriba
         const lista = res || [];
         this.eventos = lista.sort((a, b) => {
-          // Si tienen ID numérico, ordenamos por ID de mayor a menor
           if (b.id && a.id) {
             return b.id - a.id;
           }
-          // Fallback ordenando por fecha/timestamp si no hay ID
           return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
         });
       },
