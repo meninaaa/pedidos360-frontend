@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { MsalService } from '@azure/msal-angular';
+import { environment } from '../../../environments/environment'; // Ajusta la ruta si es necesario
 
 @Component({
   selector: 'app-orders',
@@ -12,15 +13,13 @@ import { MsalService } from '@azure/msal-angular';
 })
 export class OrdersComponent implements OnInit {
   pedidos: any[] = [];
-  productosDisponibles: any[] = []; // Lista para el selector de productos
+  productosDisponibles: any[] = [];
   
-  // Variables para control de roles
   isAdmin: boolean = false;
   isOperator: boolean = false;
   isCustomer: boolean = false;
   userEmail: string = '';
 
-  // Variables para controlar el formulario
   mostrarFormulario: boolean = false;
   nuevoCliente: string = '';
   productoSeleccionadoId: number | null = null;
@@ -32,7 +31,7 @@ export class OrdersComponent implements OnInit {
   ngOnInit(): void {
     this.verificarRolYUsuario();
     this.cargarPedidos();
-    this.cargarProductos(); // Cargamos el catálogo para el formulario
+    this.cargarProductos();
   }
 
   verificarRolYUsuario() {
@@ -55,12 +54,12 @@ export class OrdersComponent implements OnInit {
   }
 
   cargarPedidos() {
-    let endpoint = 'http://localhost:8080/api/bff/orders';
+    let endpoint = `${environment.apiUrl}/orders`;
     
     if (this.isCustomer) {
-      endpoint = 'http://localhost:8080/api/bff/orders/me';
+      endpoint = `${environment.apiUrl}/orders/me`;
     } else if (this.isOperator) {
-      endpoint = 'http://localhost:8080/api/bff/orders/pending';
+      endpoint = `${environment.apiUrl}/orders/pending`;
     }
 
     this.http.get<any[]>(endpoint).subscribe({
@@ -70,15 +69,13 @@ export class OrdersComponent implements OnInit {
   }
 
   cargarProductos() {
-    // Obtenemos los productos disponibles desde el BFF de catálogo
-    this.http.get<any[]>('http://localhost:8080/api/bff/catalog/products').subscribe({
+    this.http.get<any[]>(`${environment.apiUrl}/catalog/products`).subscribe({
       next: (data) => this.productosDisponibles = data || [],
       error: (err) => console.error('Error cargando catálogo para pedidos:', err)
     });
   }
 
   onProductoChange() {
-    // Autocompleta el precio total al seleccionar un producto
     const prod = this.productosDisponibles.find(p => p.id === Number(this.productoSeleccionadoId));
     if (prod) {
       this.nuevoTotal = prod.precio || prod.price || 0;
@@ -97,7 +94,7 @@ export class OrdersComponent implements OnInit {
       total: this.nuevoTotal
     };
 
-    this.http.post('http://localhost:8080/api/bff/orders', payload).subscribe({
+    this.http.post(`${environment.apiUrl}/orders`, payload).subscribe({
       next: () => {
         this.cargarPedidos();
         this.mostrarNotificacion(`¡Pedido creado con éxito!`);
@@ -117,7 +114,7 @@ export class OrdersComponent implements OnInit {
   }
 
   cambiarEstado(id: number, nuevoEstado: string) {
-    this.http.put(`http://localhost:8080/api/bff/orders/${id}/status?nuevoEstado=${nuevoEstado}`, {}).subscribe({
+    this.http.put(`${environment.apiUrl}/orders/${id}/status?nuevoEstado=${nuevoEstado}`, {}).subscribe({
       next: () => {
         this.cargarPedidos();
         this.mostrarNotificacion(`Pedido #${id} actualizado a ${nuevoEstado}.`);
