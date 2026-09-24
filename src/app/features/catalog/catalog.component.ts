@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { MsalService } from '@azure/msal-angular';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-catalog',
@@ -14,7 +15,6 @@ import { MsalService } from '@azure/msal-angular';
 export class CatalogComponent implements OnInit {
   productos: any[] = [];
   
-  // Variable de rol requerida por el HTML para ocultar/mostrar opciones de administración
   isAdmin: boolean = false;
   
   mostrarModal = false;
@@ -40,7 +40,7 @@ export class CatalogComponent implements OnInit {
   }
 
   cargarCatalogo() {
-    this.http.get<any[]>('http://localhost:8080/api/bff/catalog/products').subscribe({
+    this.http.get<any[]>(`${environment.apiUrl}/catalog/products`).subscribe({
       next: (res) => {
         this.productos = res || [];
       },
@@ -70,7 +70,7 @@ export class CatalogComponent implements OnInit {
 
   guardarProducto() {
     if (this.modoEdicion) {
-      this.http.put(`http://localhost:8080/api/bff/catalog/products/${this.productoActual.id}`, this.productoActual).subscribe({
+      this.http.put(`${environment.apiUrl}/catalog/products/${this.productoActual.id}`, this.productoActual).subscribe({
         next: () => {
           this.cargarCatalogo();
           this.cerrarModal();
@@ -81,7 +81,7 @@ export class CatalogComponent implements OnInit {
         }
       });
     } else {
-      this.http.post('http://localhost:8080/api/bff/catalog/products', this.productoActual).subscribe({
+      this.http.post(`${environment.apiUrl}/catalog/products`, this.productoActual).subscribe({
         next: () => {
           this.cargarCatalogo();
           this.cerrarModal();
@@ -96,9 +96,9 @@ export class CatalogComponent implements OnInit {
 
   eliminarProducto(id: number) {
     if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
-      this.http.delete(`http://localhost:8080/api/bff/catalog/products/${id}`).subscribe({
+      this.http.delete(`${environment.apiUrl}/catalog/products/${id}`).subscribe({
         next: () => {
-          this.cargarCatalogo(); // Recarga la tabla tras eliminar
+          this.cargarCatalogo();
         },
         error: (err) => {
           console.error('Error al eliminar en el servidor:', err);
