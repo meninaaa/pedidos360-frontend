@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment'; // Ajusta la ruta si es necesario
 
 export interface ResumenKpis {
   promedioLeadTime: number;
@@ -22,7 +23,7 @@ export interface PuntoLeadTime {
 
 @Injectable({ providedIn: 'root' })
 export class ReportService {
-  private baseUrl = 'http://localhost:8080/api/bff/reports';
+  private baseUrl = `${environment.apiUrl}/reports`;
 
   constructor(private http: HttpClient) {}
 
@@ -39,6 +40,6 @@ export class ReportService {
   }
 
   getTopProductos() {
-  return this.http.get<any[]>('http://localhost:8080/api/bff/reports/top-productos');
-}
+    return this.http.get<any[]>(`${this.baseUrl}/top-productos`);
+  }
 }
