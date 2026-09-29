@@ -12,7 +12,6 @@ El frontend de Pedidos360 no es solo una interfaz de usuario, sino un cliente in
     *   **Administrador:** Acceso irrestricto (Creación, modificación, auditoría completa y reportería).
     *   **Operador de Logística:** Flujo de trabajo focalizado. Solo puede visualizar órdenes pendientes, transicionar estados (Aceptar, Preparar, Despachar) y acceder al catálogo en modo "Solo Lectura".
     *   **Cliente:** Dashboard aislado (`/orders/me`). Seguridad a nivel de vista para garantizar que solo consuma sus propios datos.
-*   **Gestión de Entornos Dinámicos (Environments):** Implementación de variables de entorno (`environment.ts`) que permiten a la aplicación pivotar entre un consumo de API local (`localhost:8080`) y un despliegue en la nube mediante **AWS API Gateway** con un solo cambio de configuración.
 
 ## 3. Estructura de Módulos Core
 
@@ -25,21 +24,32 @@ El frontend de Pedidos360 no es solo una interfaz de usuario, sino un cliente in
 
 El frontend espera estrictamente las respuestas documentadas en los contratos **OpenAPI (Swagger)** del backend para realizar el mapeo correcto de las interfaces TypeScript.
 *   **Ruta local por defecto:** `http://localhost:8080/swagger-ui.html` 
-*   **Ruta AWS Producción:** `https://<ID_GATEWAY>.execute-api.<REGION>.amazonaws.com/swagger-ui/index.html`
+*   **Ruta AWS Producción:** `https://3lgyldt561.execute-api.us-east-1.amazonaws.com/swagger-ui/index.html`
 
-## 5. Prerrequisitos y Despliegue Local
+---
 
-*   **Node.js**: Versión 18.x o superior.
-*   **Angular CLI**: (Instalable vía `npm install -g @angular/cli`).
+## 5. Gestión de Entornos: Conexión Local vs. AWS (Cloud)
 
-**Pasos de ejecución:**
-```bash
-# 1. Clonar el repositorio
-git clone [https://github.com/meninaaa/pedidos360-frontend.git](https://github.com/meninaaa/pedidos360-frontend.git)
-cd pedidos360-frontend
+Una de las principales ventajas arquitectónicas de este proyecto es su capacidad para pivotar dinámicamente entre un entorno de desarrollo local y un entorno de producción en la nube (AWS), sin necesidad de reescribir código en los componentes.
 
-# 2. Instalar dependencias exactas
-npm install
+Esto se logra mediante la centralización de la URL del API en el archivo **`src/environments/environment.ts`**. 
 
-# 3. Compilar y levantar servidor de desarrollo
-ng serve -o
+Todos los servicios y componentes de Angular (`OrdersComponent`, `CatalogComponent`, `ReportService`, etc.) importan la variable `environment.apiUrl` para realizar sus peticiones HTTP. De esta forma, el desarrollador solo necesita **comentar o descomentar una línea** para redirigir todo el tráfico del frontend:
+
+```typescript
+// Archivo: src/environments/environment.ts
+export const environment = {
+  production: false,
+  
+  // ==========================================
+  // OPCIÓN 1: Desarrollo Local
+  // Apunta al BFF ejecutándose en tu máquina
+  // ==========================================
+  apiUrl: 'http://localhost:8080/api/bff'
+
+  // ==========================================
+  // OPCIÓN 2: Producción (AWS EC2 + API Gateway)
+  // Apunta a la infraestructura Cloud desplegada
+  // ==========================================
+  // apiUrl: 'https://3lgyldt561.execute-api.us-east-1.amazonaws.com/api/bff)'
+};
