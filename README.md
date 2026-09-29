@@ -1,53 +1,45 @@
 # Pedidos360 - Frontend (Angular)
 
-Aplicación cliente desarrollada en **Angular** para la gestión logística y visualización de pedidos en tiempo real. Este módulo forma parte del ecosistema Pedidos360, actuando como la interfaz principal de usuario. Está integrada con estándares de seguridad corporativa mediante **MSAL (Microsoft Authentication Library)** y se comunica eficientemente con una arquitectura de microservicios a través de un patrón BFF (Backend For Frontend) alojado en la nube.
+## 1. Resumen Ejecutivo
+**Pedidos360** es una plataforma logística de grado empresarial construida como una Single Page Application (SPA) utilizando **Angular**. Este módulo actúa como la capa de presentación principal (Frontend), diseñada para ofrecer una experiencia de usuario (UX) reactiva, modular y de baja latencia. Su arquitectura está orientada a la seguridad (Integración con Azure AD) y al consumo eficiente de un ecosistema de microservicios orquestado a través de un **BFF (Backend For Frontend)**.
 
----
+## 2. Arquitectura de Software y Patrones de Diseño
 
-## Características Principales
+El frontend de Pedidos360 no es solo una interfaz de usuario, sino un cliente inteligente estructurado bajo los siguientes patrones:
 
-*   **Autenticación y Seguridad Unificada:** Integración nativa con Azure AD mediante MSAL. Implementación de interceptores HTTP para la inyección automática de tokens JWT (Bearer) en las cabeceras de cada petición, garantizando comunicaciones seguras.
-*   **Control de Acceso Basado en Roles (RBAC):** Renderizado condicional e inteligente a nivel de enrutamiento y componentes, adaptando el Dashboard al nivel de acceso del usuario:
-    *   **Administrador:** Acceso total a la plataforma, gestión de todos los pedidos e indicadores clave.
-    *   **Operador:** Vista focalizada en la gestión de pedidos pendientes y transición de estados operativos.
-    *   **Cliente:** Dashboard personalizado y aislado para el seguimiento exclusivo de los pedidos propios del usuario.
-*   **UI/UX Modular:** Interfaz limpia y profesional, basada en componentes reutilizables, diseñada para optimizar el control de despachos logísticos y reducir la carga cognitiva del usuario.
+*   **Autenticación y Seguridad Unificada (MSAL):** Se utiliza la librería MSAL (Microsoft Authentication Library) para delegar la identidad a Azure AD. A través de un `MsalInterceptor` inyectado a nivel global, cada petición HTTP saliente hacia el backend incluye automáticamente el token JWT (Bearer Token) en las cabeceras, eliminando la gestión manual de sesiones y previniendo vulnerabilidades de inyección.
+*   **Control de Acceso Basado en Roles (RBAC) Dinámico:** El enrutamiento y la renderización del DOM están protegidos por **Route Guards** (`MsalGuard`, `RoleGuard`) y directivas estructurales (`*ngIf`). El sistema lee los `claims` del token JWT decodificado en tiempo real para adaptar la interfaz:
+    *   **Administrador:** Acceso irrestricto (Creación, modificación, auditoría completa y reportería).
+    *   **Operador de Logística:** Flujo de trabajo focalizado. Solo puede visualizar órdenes pendientes, transicionar estados (Aceptar, Preparar, Despachar) y acceder al catálogo en modo "Solo Lectura".
+    *   **Cliente:** Dashboard aislado (`/orders/me`). Seguridad a nivel de vista para garantizar que solo consuma sus propios datos.
+*   **Gestión de Entornos Dinámicos (Environments):** Implementación de variables de entorno (`environment.ts`) que permiten a la aplicación pivotar entre un consumo de API local (`localhost:8080`) y un despliegue en la nube mediante **AWS API Gateway** con un solo cambio de configuración.
 
-## Arquitectura y Componentes Técnicos
+## 3. Estructura de Módulos Core
 
-*   **Framework Principal:** Angular (TypeScript).
-*   **Gestión de Identidad:** MSAL Angular (@azure/msal-angular).
-*   **Comunicación HTTP:** Interceptores modulares (AuthInterceptor) y servicios HTTP inyectables para el consumo de la API Gateway (AWS).
-*   **Estilos:** CSS modular y semántico, enfocado en el rendimiento y la escalabilidad visual sin dependencias excesivas.
+*   **Módulo Dashboard:** Panel ejecutivo que consume reportes agregados. Renderiza de forma condicional KPIs y "Top Productos" dependiendo del rol del usuario.
+*   **Módulo Orders:** Máquina de estados visual. Integra formularios inteligentes que cruzan datos con el catálogo de productos para autocompletar flujos de facturación.
+*   **Módulo Catalog:** Interfaz CRUD de inventario. Protegida granularmente para evitar manipulaciones de stock por personal no autorizado.
+*   **Módulos de Auditoría y Reportería:** Consumidores de los microservicios asíncronos para trazar movimientos y métricas de negocio.
 
----
+## 4. Documentación de API y Contratos (Swagger)
 
-## Documentación de API y Swagger
+El frontend espera estrictamente las respuestas documentadas en los contratos **OpenAPI (Swagger)** del backend para realizar el mapeo correcto de las interfaces TypeScript.
+*   **Ruta local por defecto:** `http://localhost:8080/swagger-ui.html` 
+*   **Ruta AWS Producción:** `https://<ID_GATEWAY>.execute-api.<REGION>.amazonaws.com/swagger-ui/index.html`
 
-El frontend de Pedidos360 interactúa directamente con los endpoints expuestos por el BFF. Los contratos de esta API (rutas, métodos esperados y modelos de datos) están documentados de forma interactiva a través de **Swagger / OpenAPI**.
-
-Para revisar los contratos técnicos al momento de desarrollar o ajustar llamadas desde los servicios de Angular, consulta el Swagger del backend:
-
-> **Ruta local por defecto:** `http://localhost:8080/swagger-ui.html` 
-> *(Asegúrate de tener el microservicio BFF en ejecución para acceder a los endpoints de `/api/bff/orders`, `/api/bff/catalog`, etc.)*
-
-El frontend espera estrictamente las respuestas documentadas en el Swagger para realizar el mapeo correcto de las interfaces TypeScript.
-
----
-
-## Prerrequisitos de Entorno
-
-Para compilar y ejecutar este proyecto de forma local, se requiere:
+## 5. Prerrequisitos y Despliegue Local
 
 *   **Node.js**: Versión 18.x o superior.
-*   **Angular CLI**: Versión compatible con el proyecto (ejecutar `ng version` tras la instalación).
-*   **Git**: Para el control de versiones.
+*   **Angular CLI**: (Instalable vía `npm install -g @angular/cli`).
 
----
+**Pasos de ejecución:**
+```bash
+# 1. Clonar el repositorio
+git clone [https://github.com/meninaaa/pedidos360-frontend.git](https://github.com/meninaaa/pedidos360-frontend.git)
+cd pedidos360-frontend
 
-## Configuración y Ejecución Local
+# 2. Instalar dependencias exactas
+npm install
 
-1. **Clonar el repositorio:**
-   ```bash
-   git clone [https://github.com/meninaaa/pedidos360-frontend.git](https://github.com/meninaaa/pedidos360-frontend.git)
-   cd pedidos360-frontend
+# 3. Compilar y levantar servidor de desarrollo
+ng serve -o
