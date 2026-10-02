@@ -8,11 +8,12 @@ import { OrdersComponent } from './features/orders/orders.component';
 import { CatalogComponent } from './features/catalog/catalog.component';
 import { ReportsComponent } from './features/reports/reports.component';
 import { AuditComponent } from './features/audit/audit.component';
-
+import { PaymentResultComponent } from './features/orders/payment-result.component';
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'auth/callback', component: LoginComponent }, 
+  { path: 'payment-result', component: PaymentResultComponent },
 
   // Rutas Privadas
   { path: 'dashboard', component: DashboardComponent, canActivate: [MsalGuard] },

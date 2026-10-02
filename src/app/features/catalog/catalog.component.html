@@ -1,78 +1,121 @@
-<div class="page-container">
-  <div class="page-header">
+<div style="padding: 40px 50px; background-color: transparent; min-height: calc(100vh - 76px); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;">
+  
+  <!-- ENCABEZADO -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; border-bottom: 1px solid #e2e8f0; padding-bottom: 24px;">
     <div>
-      <h2>Catálogo de Productos</h2>
-      <p class="subtitle">Gestión de inventario y stock disponible</p>
+      <h2 style="margin: 0; font-size: 24px; color: #0f172a; font-weight: 600; letter-spacing: -0.5px;">Catálogo de Productos</h2>
+      <p style="color: #64748b; font-size: 14px; margin: 6px 0 0 0;">Gestión de inventario y stock disponible.</p>
     </div>
-    <!-- Botón de Nuevo Producto: Solo visible para el Administrador -->
-    <button *ngIf="isAdmin" class="primary-btn" (click)="abrirModalNuevo()">+ Nuevo Producto</button>
+    <!-- Botón de acción principal minimalista -->
+    <button *ngIf="isAdmin" (click)="abrirModalNuevo()" 
+            style="background: #0f172a; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.1);"
+            onmouseover="this.style.backgroundColor='#1e293b'" onmouseout="this.style.backgroundColor='#0f172a'">
+      + Nuevo Producto
+    </button>
   </div>
 
-  <div class="table-card">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre del Producto</th>
-          <th>Precio</th>
-          <th>Stock Actual</th>
-          <th>Estado</th>
-          <!-- La columna Acciones solo la ve el Admin -->
-          <th *ngIf="isAdmin">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let prod of productos">
-          <td class="id-cell">#{{ prod.id || 'N/A' }}</td>
-          <td><strong>{{ prod.nombre || prod.name }}</strong></td>
-          <td>{{ (prod.precio || prod.price) | currency:'CLP' }}</td>
-          <td>
-            <span class="stock-badge" [class.low-stock]="(prod.stock) < 10">
-              {{ prod.stock }} unid.
-            </span>
-          </td>
-          <td><span class="status active">{{ prod.estado || 'Disponible' }}</span></td>
+  <!-- TABLA PRINCIPAL DE DATOS -->
+  <div style="background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; overflow: hidden;">
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+          <tr style="background-color: #f8fafc;">
+            <th style="padding: 16px 24px; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0;">Ref</th>
+            <th style="padding: 16px 24px; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0;">Producto</th>
+            <th style="padding: 16px 24px; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0;">Valor</th>
+            <th style="padding: 16px 24px; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0;">Inventario</th>
+            <th style="padding: 16px 24px; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0;">Disponibilidad</th>
+            <th *ngIf="isAdmin" style="padding: 16px 24px; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0; text-align: right;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let prod of productos" style="transition: background 0.2s;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='transparent'">
+            <td style="padding: 18px 24px; border-bottom: 1px solid #f1f5f9; color: #64748b; font-size: 13px;">#{{ prod.id || 'N/A' }}</td>
+            <td style="padding: 18px 24px; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-weight: 600; font-size: 14px;">{{ prod.nombre || prod.name }}</td>
+            <td style="padding: 18px 24px; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-weight: 500; font-size: 14px;">{{ (prod.precio || prod.price) | currency:'CLP':'symbol-narrow' }}</td>
+            
+            <td style="padding: 18px 24px; border-bottom: 1px solid #f1f5f9;">
+              <span [ngStyle]="{'color': (prod.stock < 10) ? '#ef4444' : '#0f172a', 'font-weight': (prod.stock < 10) ? '600' : '500', 'font-size': '14px'}">
+                {{ prod.stock }} <span style="color: #94a3b8; font-size: 12px; font-weight: 400;">unid.</span>
+              </span>
+            </td>
+            
+            <td style="padding: 18px 24px; border-bottom: 1px solid #f1f5f9;">
+              <!-- Punto de estado (Dot Indicator) en lugar de pastillas -->
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: #334155;">
+                <span style="font-size: 10px;" [ngStyle]="{'color': (prod.estado === 'Agotado' || prod.stock === 0) ? '#ef4444' : '#10b981'}">●</span>
+                {{ prod.estado || 'Disponible' }}
+              </div>
+            </td>
+            
+            <td *ngIf="isAdmin" style="padding: 18px 24px; border-bottom: 1px solid #f1f5f9; text-align: right;">
+              <!-- Botones de Acción en formato de enlaces Flex horizontales -->
+              <div style="display: flex; justify-content: flex-end; gap: 14px;">
+                <button style="background: none; border: none; padding: 4px 0; cursor: pointer; color: #3b82f6; font-size: 13px; font-weight: 500; transition: color 0.2s;" 
+                        onmouseover="this.style.color='#1d4ed8'" onmouseout="this.style.color='#3b82f6'"
+                        (click)="abrirModalEditar(prod)">Editar</button>
+                        
+                <button style="background: none; border: none; padding: 4px 0; cursor: pointer; color: #94a3b8; font-size: 13px; font-weight: 500; transition: color 0.2s;" 
+                        onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#94a3b8'"
+                        (click)="eliminarProducto(prod.id)">Eliminar</button>
+              </div>
+            </td>
+          </tr>
           
-          <!-- Botones de Editar y Eliminar: Ocultos para el Cliente -->
-          <td *ngIf="isAdmin">
-            <button class="icon-btn" (click)="abrirModalEditar(prod)" style="margin-right: 5px; background: #f1f3f4; border: 1px solid #ccc; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Editar</button>
-            <button style="background: transparent; border: 1px solid #d93025; color: #d93025; padding: 6px 12px; border-radius: 4px; cursor: pointer;" (click)="eliminarProducto(prod.id)">Eliminar</button>
-          </td>
-        </tr>
-        
-        <tr *ngIf="productos.length === 0">
-          <td [attr.colspan]="isAdmin ? 6 : 5" class="empty-state" style="padding: 30px; text-align: center; color: #6a737d; font-style: italic;">
-            No hay productos cargados o esperando respuesta del servidor...
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          <!-- Estado Vacío -->
+          <tr *ngIf="productos.length === 0">
+            <td [attr.colspan]="isAdmin ? 6 : 5" style="padding: 60px 20px; text-align: center;">
+              <div style="font-size: 32px; color: #cbd5e1; margin-bottom: 12px;">📦</div>
+              <p style="color: #94a3b8; font-size: 14px; margin: 0; font-weight: 500;">El catálogo se encuentra vacío o sincronizando.</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
-<!-- MODAL FLOTANTE PARA CREAR / EDITAR (Solo accesible si el Admin hace clic) -->
-<div *ngIf="mostrarModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;">
-  <div style="background: white; padding: 30px; border-radius: 8px; width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-    <h3 style="margin-top: 0; color: #1a1a1a;">{{ modoEdicion ? 'Editar Producto' : 'Nuevo Producto' }}</h3>
+<!-- MODAL ELEGANTE PARA CREAR / EDITAR -->
+<div *ngIf="mostrarModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); display: flex; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(4px);">
+  <div style="background: white; padding: 40px; border-radius: 16px; width: 100%; max-width: 440px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); font-family: 'Inter', sans-serif;">
     
-    <div style="margin-bottom: 15px;">
-      <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">Nombre del Producto</label>
-      <input type="text" [(ngModel)]="productoActual.nombre" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+    <h3 style="margin: 0 0 28px 0; color: #0f172a; font-size: 20px; font-weight: 600; letter-spacing: -0.5px;">
+      {{ modoEdicion ? 'Actualizar Producto' : 'Nuevo Registro' }}
+    </h3>
+    
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      <div>
+        <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; color: #64748b;">Nombre del Producto</label>
+        <input type="text" [(ngModel)]="productoActual.nombre" placeholder="Ej. MacBook Pro M3"
+               style="width: 100%; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; transition: border-color 0.2s; color: #0f172a;"
+               onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#cbd5e1'">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; color: #64748b;">Valor Unitario (CLP)</label>
+          <input type="number" [(ngModel)]="productoActual.precio" placeholder="0"
+                 style="width: 100%; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; transition: border-color 0.2s; color: #0f172a;"
+                 onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#cbd5e1'">
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; color: #64748b;">Stock Inicial</label>
+          <input type="number" [(ngModel)]="productoActual.stock" placeholder="0"
+                 style="width: 100%; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; transition: border-color 0.2s; color: #0f172a;"
+                 onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#cbd5e1'">
+        </div>
+      </div>
     </div>
 
-    <div style="margin-bottom: 15px;">
-      <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">Precio (CLP)</label>
-      <input type="number" [(ngModel)]="productoActual.precio" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-    </div>
-
-    <div style="margin-bottom: 20px;">
-      <label style="display: block; font-size: 13px; color: #666; margin-bottom: 5px;">Stock</label>
-      <input type="number" [(ngModel)]="productoActual.stock" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-    </div>
-
-    <div style="display: flex; justify-content: flex-end; gap: 10px;">
-      <button (click)="cerrarModal()" style="background: #f1f3f4; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Cancelar</button>
-      <button (click)="guardarProducto()" style="background: #0366d6; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Guardar</button>
+    <!-- Controles del Modal -->
+    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 36px;">
+      <button (click)="cerrarModal()" style="background: white; color: #475569; border: 1px solid #cbd5e1; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 13px; transition: background 0.2s;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='white'">
+        Cancelar
+      </button>
+      <button (click)="guardarProducto()" style="background: #0f172a; color: white; border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 13px; transition: background 0.2s; box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.1);" onmouseover="this.style.backgroundColor='#1e293b'" onmouseout="this.style.backgroundColor='#0f172a'">
+        Confirmar
+      </button>
     </div>
   </div>
 </div>

@@ -1,110 +1,146 @@
+/* Importar una tipografía moderna y geométrica para interfaces (Inter) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 .app-layout {
   display: flex;
   height: 100vh;
-  background-color: #f4f7f6;
-  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  /* Fondo general gris frío muy claro, descansa la vista */
+  background-color: #f8fafc; 
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow: hidden;
 }
 
+/* BARRA LATERAL - Adiós al borde derecho, hola sombra sutil */
 .sidebar {
-  width: 260px;
+  width: 270px;
   background-color: #ffffff;
-  border-right: 1px solid #e1e4e8;
+  border-right: none; 
+  box-shadow: 1px 0 20px rgba(0, 0, 0, 0.03); /* Separación por profundidad, no por línea */
   display: flex;
   flex-direction: column;
+  z-index: 10;
 }
 
 .brand {
-  padding: 20px 25px;
+  padding: 32px 30px 24px;
   font-size: 20px;
-  font-weight: 600;
-  color: #1a1a1a;
-  border-bottom: 1px solid #e1e4e8;
+  font-weight: 700;
+  color: #0f172a;
+  border-bottom: none; /* Cabecera limpia */
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  letter-spacing: -0.5px;
 }
 
 .brand-icon {
-  color: #0366d6;
+  color: #2563eb;
   font-size: 24px;
 }
 
 .nav-menu {
-  padding: 20px 0;
+  padding: 10px 16px; /* Espacio para que los botones "floten" dentro de la barra */
   display: flex;
   flex-direction: column;
+  gap: 8px; /* Separación entre botones */
 }
 
+/* LINKS DE NAVEGACIÓN - Formato Píldora (Pill) */
 .nav-link {
-  padding: 12px 25px;
-  color: #586069;
+  padding: 12px 18px;
+  color: #64748b;
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
-  transition: all 0.2s;
-  border-left: 3px solid transparent;
+  border-radius: 10px; /* Curvas suaves, no cuadradas */
+  border-left: none;
+  transition: all 0.25s ease;
   cursor: pointer;
+  display: flex;
+  align-items: center;
 }
 
 .nav-link:hover {
-  background-color: #f8f9fa;
-  color: #24292e;
+  background-color: #f1f5f9;
+  color: #0f172a;
+  transform: translateX(4px); /* Micro-interacción: Pequeño salto a la derecha al pasar el mouse */
 }
 
+/* LINK ACTIVO - Contraste alto corporativo (estilo Vercel/Linear) */
 .active-link {
-  background-color: #f0f7ff;
-  color: #0366d6;
-  border-left: 3px solid #0366d6;
+  background-color: #0f172a; /* Fondo casi negro */
+  color: #ffffff !important;
+  font-weight: 600;
+  border-left: none;
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.1), 0 2px 4px -1px rgba(15, 23, 42, 0.06);
+}
+
+.active-link:hover {
+  transform: none; /* El elemento activo no salta */
+  background-color: #1e293b;
 }
 
 .main-wrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
+  background-color: #f8fafc;
 }
 
+/* HEADER SUPERIOR - Se funde con el fondo, empujando la interfaz a la derecha */
 .top-header {
-  height: 60px;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e1e4e8;
+  height: 76px;
+  background-color: transparent; 
+  border-bottom: none; 
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end; /* Alinea los controles a la derecha */
   align-items: center;
-  padding: 0 30px;
+  padding: 0 40px;
 }
 
 .header-status {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #28a745;
-  font-weight: 500;
+  gap: 10px;
+  font-size: 12px;
+  color: #059669;
+  font-weight: 600;
+  background: #ecfdf5; /* Fondo verde pastel ultra suave */
+  padding: 8px 16px;
+  border-radius: 20px;
+  margin-right: 20px; /* Separación del botón de logout */
 }
 
 .status-dot {
-  width: 8px;
-  height: 8px;
-  background-color: #28a745;
+  width: 6px;
+  height: 6px;
+  background-color: #10b981;
   border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); /* Efecto de pulso / antena estática */
 }
 
+/* BOTÓN CERRAR SESIÓN - Táctico y delineado */
 .logout-btn {
-  background: transparent;
-  border: none;
-  color: #d73a49;
+  background: white;
+  border: 1px solid #e2e8f0;
+  color: #475569;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 20px;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .logout-btn:hover {
-  color: #a71d2a;
+  border-color: #ef4444;
+  color: #ef4444;
+  background: #fef2f2;
 }
 
 .content-area {
   flex: 1;
   overflow-y: auto;
+  /* El padding interno ya se maneja dentro de cada vista (ej. dashboard.component.html) */
 }

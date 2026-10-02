@@ -26,6 +26,7 @@ export class DashboardComponent implements OnInit {
   pedidosCliente: Pedido[] = [];
 
   userName = '';
+  userEmail = ''; // ✅ NUEVO: Variable para guardar el correo
   userRoles: string[] = [];
 
   isAdmin = false;
@@ -35,28 +36,34 @@ export class DashboardComponent implements OnInit {
   constructor(private http: HttpClient, private authService: MsalService) {}
 
   ngOnInit(): void {
-    this.cargarUsuario();
+    // ✅ CORRECCIÓN 1: Esperar a que MSAL termine de cargar (Solución F5)
+    this.authService.instance.handleRedirectPromise().then(() => {
+      this.cargarUsuario();
 
-    if (this.isAdmin) {
-      this.cargarResumenAdmin();
-    }
-    if (this.isOperator) {
-      this.cargarPedidosOperador();
-    }
-    if (this.isCustomer) {
-      this.cargarPedidosCliente();
-    }
+      if (this.isAdmin) {
+        this.cargarResumenAdmin();
+      }
+      if (this.isOperator) {
+        this.cargarPedidosOperador();
+      }
+      if (this.isCustomer) {
+        this.cargarPedidosCliente();
+      }
+    });
   }
 
   cargarUsuario() {
     const account = this.authService.instance.getActiveAccount() || this.authService.instance.getAllAccounts()[0];
     if (account) {
       this.userName = account.name || 'Usuario';
+      this.userEmail = account.username; // Capturamos el email exacto
+
       this.userRoles = (account.idTokenClaims?.['roles'] as string[]) || [];
 
-      this.isAdmin = this.userRoles.includes('Admin');
-      this.isOperator = this.userRoles.includes('Operador');
-      this.isCustomer = this.userRoles.includes('Cliente');
+      // Validaciones robustas de roles (igual que en OrdersComponent)
+      this.isAdmin = this.userRoles.includes('Admin') || this.userRoles.includes('Administrador');
+      this.isOperator = this.userRoles.includes('Operador') || this.userRoles.includes('Operador de Logística');
+      this.isCustomer = this.userRoles.includes('Cliente') || this.userRoles.includes('Customer') || (!this.isAdmin && !this.isOperator);
     }
   }
 
@@ -86,9 +93,10 @@ export class DashboardComponent implements OnInit {
   }
 
   cargarPedidosCliente() {
-    this.http.get<Pedido[]>(`${environment.apiUrl}/orders/me`).subscribe({
+    // ✅ CORRECCIÓN 2: Usar el nuevo puente de BFF con Query Parameter (?email=)
+    this.http.get<Pedido[]>(`${environment.apiUrl}/orders/customer?email=${this.userEmail}`).subscribe({
       next: (pedidos) => this.pedidosCliente = pedidos,
-      error: (err) => console.error('Error cargando mis pedidos:', err)
+      error: (err) => console.error('Error cargando mis pedidos en dashboard:', err)
     });
   }
 }

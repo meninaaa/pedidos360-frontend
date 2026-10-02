@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { MsalService } from '@azure/msal-angular';
-import { environment } from '../../../environments/environment'; // Ajusta la ruta si es necesario
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-orders',
@@ -22,16 +22,24 @@ export class OrdersComponent implements OnInit {
 
   mostrarFormulario: boolean = false;
   nuevoCliente: string = '';
+  
+  // Variables del Carrito
   productoSeleccionadoId: number | null = null;
-  nuevoTotal: number | null = null;
+  cantidadSeleccionada: number = 1;
+  carrito: any[] = [];
+  nuevoTotal: number = 0;
+  
   notificacion: string | null = null;
+  pedidoSeleccionado: any = null;
 
   constructor(private http: HttpClient, private msalService: MsalService) {}
 
   ngOnInit(): void {
-    this.verificarRolYUsuario();
-    this.cargarPedidos();
-    this.cargarProductos();
+    this.msalService.instance.handleRedirectPromise().then(() => {
+      this.verificarRolYUsuario();
+      this.cargarPedidos();
+      this.cargarProductos();
+    });
   }
 
   verificarRolYUsuario() {
@@ -57,7 +65,7 @@ export class OrdersComponent implements OnInit {
     let endpoint = `${environment.apiUrl}/orders`;
     
     if (this.isCustomer) {
-      endpoint = `${environment.apiUrl}/orders/me`;
+      endpoint = `${environment.apiUrl}/orders/customer?email=${this.userEmail}`;
     } else if (this.isOperator) {
       endpoint = `${environment.apiUrl}/orders/pending`;
     }
@@ -71,39 +79,70 @@ export class OrdersComponent implements OnInit {
   cargarProductos() {
     this.http.get<any[]>(`${environment.apiUrl}/catalog/products`).subscribe({
       next: (data) => this.productosDisponibles = data || [],
-      error: (err) => console.error('Error cargando catálogo para pedidos:', err)
+      error: (err) => console.error('Error cargando catálogo:', err)
     });
   }
 
+  // --- Lógica del Carrito ---
+  
   onProductoChange() {
+    // Solo actualiza la vista, no agrega nada aún
+  }
+
+  agregarAlCarrito() {
+    if (!this.productoSeleccionadoId || this.cantidadSeleccionada < 1) return;
+    
     const prod = this.productosDisponibles.find(p => p.id === Number(this.productoSeleccionadoId));
     if (prod) {
-      this.nuevoTotal = prod.precio || prod.price || 0;
+      const precio = prod.precio || prod.price || 0;
+      const subtotal = precio * this.cantidadSeleccionada;
+      
+      this.carrito.push({
+        productId: prod.id,
+        nombre: prod.nombre || prod.name,
+        precio: precio,
+        quantity: this.cantidadSeleccionada, // Hace match con tu OrderItem.java
+        subtotal: subtotal
+      });
+      
+      this.calcularTotal();
+      this.productoSeleccionadoId = null;
+      this.cantidadSeleccionada = 1;
     }
   }
 
+  quitarDelCarrito(index: number) {
+    this.carrito.splice(index, 1);
+    this.calcularTotal();
+  }
+
+  calcularTotal() {
+    this.nuevoTotal = this.carrito.reduce((acc, item) => acc + item.subtotal, 0);
+  }
+
   guardarPedido() {
-    if (!this.nuevoCliente || !this.productoSeleccionadoId || !this.nuevoTotal) {
-      this.mostrarNotificacion('Por favor completa todos los campos y selecciona un producto.');
+    if (!this.nuevoCliente || this.carrito.length === 0) {
+      this.mostrarNotificacion('Agrega al menos un producto al carrito.');
       return;
     }
 
     const payload = {
       customerId: this.nuevoCliente.trim(),
-      productId: Number(this.productoSeleccionadoId),
-      total: this.nuevoTotal
+      total: this.nuevoTotal,
+      items: this.carrito.map(item => ({
+        productId: item.productId,
+        quantity: item.quantity
+      }))
     };
 
     this.http.post(`${environment.apiUrl}/orders`, payload).subscribe({
       next: () => {
         this.cargarPedidos();
-        this.mostrarNotificacion(`¡Pedido creado con éxito!`);
+        this.mostrarNotificacion(`¡Orden procesada con éxito!`);
         
-        if (!this.isCustomer) {
-          this.nuevoCliente = '';
-        }
-        this.productoSeleccionadoId = null;
-        this.nuevoTotal = null;
+        if (!this.isCustomer) this.nuevoCliente = '';
+        this.carrito = [];
+        this.nuevoTotal = 0;
         this.mostrarFormulario = false;
       },
       error: (err) => {
@@ -112,6 +151,8 @@ export class OrdersComponent implements OnInit {
       }
     });
   }
+
+  // --- Lógica de Estados y Webpay ---
 
   cambiarEstado(id: number, nuevoEstado: string) {
     this.http.put(`${environment.apiUrl}/orders/${id}/status?nuevoEstado=${nuevoEstado}`, {}).subscribe({
@@ -126,10 +167,57 @@ export class OrdersComponent implements OnInit {
     });
   }
 
+  iniciarPagoWebpay(orderId: number, totalStr: any) {
+    const totalNumerico = Number(String(totalStr).replace(/[^0-9.-]+/g,""));
+    const endpoint = `${environment.apiUrl}/payments/create?amount=${totalNumerico}&orderId=${orderId}`;
+
+    this.http.post<any>(endpoint, {}).subscribe({
+      next: (response) => {
+        if (response.url && response.token_ws) {
+          this.redirigirATransbank(response.url, response.token_ws);
+        } else {
+          this.mostrarNotificacion('Transbank no respondió correctamente.');
+        }
+      },
+      error: (err) => {
+        console.error('Error al iniciar Webpay:', err);
+        this.mostrarNotificacion('Falló la conexión con el servidor de pagos.');
+      }
+    });
+  }
+
+  redirigirATransbank(url: string, token: string) {
+    const form = document.createElement('form');
+    form.action = url;
+    form.method = 'POST';
+
+    const inputToken = document.createElement('input');
+    inputToken.type = 'hidden';
+    inputToken.name = 'token_ws';
+    inputToken.value = token;
+
+    form.appendChild(inputToken);
+    document.body.appendChild(form);
+    form.submit();
+  }
+
   mostrarNotificacion(mensaje: string) {
     this.notificacion = mensaje;
     setTimeout(() => {
       this.notificacion = null;
     }, 4000);
+  }
+
+  verDetalle(pedido: any) {
+    this.pedidoSeleccionado = pedido;
+  }
+
+  cerrarDetalle() {
+    this.pedidoSeleccionado = null;
+  }
+
+  obtenerNombreProducto(productId: number): string {
+    const prod = this.productosDisponibles.find(p => p.id === productId);
+    return prod ? (prod.nombre || prod.name || 'Producto Desconocido') : 'Producto Desconocido';
   }
 }
