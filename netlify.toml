@@ -2,6 +2,9 @@
   command = "npm install && npm run build"
   publish = "dist/frontend-pedidos360/browser"
 
+[build.environment]
+  NODE_VERSION = "18"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
