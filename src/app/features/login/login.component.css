@@ -1,65 +1,109 @@
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f4f7f6;
-  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-.login-card {
-  background: white;
-  padding: 40px 50px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  text-align: center;
-  max-width: 400px;
-  width: 100%;
-}
-
-.brand-title {
-  color: #1a1a1a;
-  font-size: 28px;
-  font-weight: 600;
+:host {
+  display: block;
+  width: 100vw;
+  height: 100vh;
   margin: 0;
-  letter-spacing: -0.5px;
+  padding: 0;
+  overflow: hidden;
 }
 
-.subtitle {
-  color: #666;
-  font-size: 14px;
-  margin-top: 5px;
+.login-layout { 
+  display: flex; 
+  width: 100vw;
+  height: 100vh; 
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+  box-sizing: border-box;
 }
 
-.divider {
-  height: 1px;
-  background-color: #eaeaea;
-  margin: 25px 0;
+/* PANEL IZQUIERDO: Branding Corporativo */
+.brand-side { 
+  flex: 1.1; 
+  background: linear-gradient(135deg, #0f1e36 0%, #0a1424 100%); 
+  color: white; 
+  display: flex; 
+  flex-direction: column; 
+  justify-content: space-between; 
+  padding: 60px 80px; 
+  position: relative; 
+  overflow: hidden; 
+  box-sizing: border-box;
 }
 
-.instruction {
-  color: #4a4a4a;
-  font-size: 14px;
-  margin-bottom: 25px;
+/* Patrón geométrico sutil */
+.brand-side::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%; width: 200%; height: 200%;
+  background-image: 
+    radial-gradient(circle at center, rgba(255,255,255,0.03) 2px, transparent 2px),
+    radial-gradient(circle at center, rgba(255,255,255,0.03) 2px, transparent 2px);
+  background-size: 60px 60px;
+  background-position: 0 0, 30px 30px;
+  opacity: 0.5;
+  pointer-events: none;
 }
 
-.sso-button {
-  background-color: #2f2f2f;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  font-size: 14px;
-  font-weight: 500;
-  border-radius: 4px;
-  cursor: pointer;
-  width: 100%;
-  transition: background-color 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
+/* CENTRADO VERTICAL AUTOMÁTICO DEL BLOQUE CENTRAL */
+.brand-center-content {
+  position: relative;
+  z-index: 1;
+  margin: auto 0; /* Esto centra perfectamente el contenido entre el logo y el footer */
 }
 
-.sso-button:hover {
-  background-color: #000000;
+/* LÍNEA DECORATIVA AZUL */
+.blue-accent-line {
+  width: 32px;
+  height: 3px;
+  background-color: #2563eb;
+  border-radius: 2px;
+  margin-bottom: 24px;
+}
+
+/* PANEL DERECHO: Formulario Blanco */
+.form-side { 
+  flex: 1; 
+  background: #ffffff; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  padding: 40px; 
+  box-sizing: border-box;
+}
+
+/* BOTÓN MICROSOFT */
+.ms-button {
+  width: 100%; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 12px; 
+  background: #ffffff; 
+  border: 1px solid #e2e8f0; 
+  color: #0f172a; 
+  font-size: 14px; 
+  font-weight: 600; 
+  padding: 14px; 
+  border-radius: 8px; 
+  cursor: pointer; 
+  transition: all 0.2s ease; 
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+
+.ms-button:hover {
+  background-color: #f8fafc; 
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+
+/* RESPONSIVIDAD PARA MÓVILES */
+@media (max-width: 900px) {
+  .login-layout { flex-direction: column; overflow-y: auto; }
+  .brand-side { flex: none; padding: 40px; min-height: 320px; }
+  .brand-center-content { margin: 40px 0; }
 }

@@ -1,102 +1,95 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { RouterLink } from '@angular/router';
 import { MsalService } from '@azure/msal-angular';
-import { RouterModule } from '@angular/router';
 import { environment } from '../../../environments/environment';
-
-interface Pedido {
-  id: number;
-  customerId: string;
-  status: string;
-  total: number;
-  createdAt: string;
-}
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
-  templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css'
+  imports: [CommonModule, RouterLink],
+  templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit {
-  resumenAdmin = { ventasTotales: 0, pedidosActivos: 0, usuariosActivos: 0 };
-  pedidosOperador: Pedido[] = [];
-  pedidosCliente: Pedido[] = [];
+  userName: string = '';
+  userRoleStr: string = '';
+  
+  isAdmin: boolean = false;
+  isOperator: boolean = false;
+  isCustomer: boolean = false;
 
-  userName = '';
-  userEmail = ''; // ✅ NUEVO: Variable para guardar el correo
-  userRoles: string[] = [];
+  resumenAdmin: any = { ventasTotales: 0, pedidosActivos: 0, usuariosActivos: 0 };
+  pedidosCliente: any[] = [];
+  pedidosOperador: any[] = [];
 
-  isAdmin = false;
-  isOperator = false;
-  isCustomer = false;
-
-  constructor(private http: HttpClient, private authService: MsalService) {}
+  constructor(private http: HttpClient, private msalService: MsalService) {}
 
   ngOnInit(): void {
-    // ✅ CORRECCIÓN 1: Esperar a que MSAL termine de cargar (Solución F5)
-    this.authService.instance.handleRedirectPromise().then(() => {
-      this.cargarUsuario();
-
-      if (this.isAdmin) {
-        this.cargarResumenAdmin();
-      }
-      if (this.isOperator) {
-        this.cargarPedidosOperador();
-      }
-      if (this.isCustomer) {
-        this.cargarPedidosCliente();
-      }
-    });
+    this.verificarRolYUsuario();
+    this.cargarDatosDashboard();
   }
 
-  cargarUsuario() {
-    const account = this.authService.instance.getActiveAccount() || this.authService.instance.getAllAccounts()[0];
-    if (account) {
-      this.userName = account.name || 'Usuario';
-      this.userEmail = account.username; // Capturamos el email exacto
+  verificarRolYUsuario() {
+    const accounts = this.msalService.instance.getAllAccounts();
+    if (accounts.length > 0) {
+      const account = accounts[0];
+      this.userName = account.name || account.username;
+      const name = (account.name || '').toLowerCase();
+      const email = (account.username || '').toLowerCase();
+      const claims: any = account.idTokenClaims;
+      const roles = claims?.roles || []; 
 
-      this.userRoles = (account.idTokenClaims?.['roles'] as string[]) || [];
+      const hasAdminRole = roles.includes('Administrador') || roles.includes('Admin');
+      const hasOperatorRole = roles.includes('Operador de Logística') || roles.includes('Operador');
+      const isExplicitClient = name.includes('cliente') || email.includes('cliente') || roles.includes('Cliente') || roles.includes('Customer');
 
-      // Validaciones robustas de roles (igual que en OrdersComponent)
-      this.isAdmin = this.userRoles.includes('Admin') || this.userRoles.includes('Administrador');
-      this.isOperator = this.userRoles.includes('Operador') || this.userRoles.includes('Operador de Logística');
-      this.isCustomer = this.userRoles.includes('Cliente') || this.userRoles.includes('Customer') || (!this.isAdmin && !this.isOperator);
+      if (isExplicitClient) {
+        this.isAdmin = false;
+        this.isOperator = false;
+        this.isCustomer = true;
+      } else if (hasAdminRole) {
+        this.isAdmin = true;
+        this.isOperator = false;
+        this.isCustomer = false;
+      } else if (hasOperatorRole) {
+        this.isAdmin = false;
+        this.isOperator = true;
+        this.isCustomer = false;
+      } else {
+        this.isAdmin = false;
+        this.isOperator = false;
+        this.isCustomer = true;
+      }
+
+      if (this.isAdmin) {
+        this.userRoleStr = 'Administrador';
+      } else if (this.isOperator) {
+        this.userRoleStr = 'Operador Logístico';
+      } else {
+        this.userRoleStr = 'Cliente Corporativo';
+      }
     }
   }
 
-  cargarResumenAdmin() {
-    this.http.get<any>(`${environment.apiUrl}/reports/summary`).subscribe({
-      next: (data) => {
-        this.resumenAdmin.ventasTotales = data.ventasTotales;
-        this.resumenAdmin.pedidosActivos = data.pedidosActivos;
-      },
-      error: (err) => console.error('Error cargando resumen admin:', err)
-    });
-
-    this.http.get<Pedido[]>(`${environment.apiUrl}/orders`).subscribe({
-      next: (pedidos) => {
-        const clientesUnicos = new Set(pedidos.map(p => p.customerId));
-        this.resumenAdmin.usuariosActivos = clientesUnicos.size;
-      },
-      error: (err) => console.error('Error calculando usuarios activos:', err)
-    });
-  }
-
-  cargarPedidosOperador() {
-    this.http.get<Pedido[]>(`${environment.apiUrl}/orders/pending`).subscribe({
-      next: (pedidos) => this.pedidosOperador = pedidos,
-      error: (err) => console.error('Error cargando pedidos pendientes:', err)
-    });
-  }
-
-  cargarPedidosCliente() {
-    // ✅ CORRECCIÓN 2: Usar el nuevo puente de BFF con Query Parameter (?email=)
-    this.http.get<Pedido[]>(`${environment.apiUrl}/orders/customer?email=${this.userEmail}`).subscribe({
-      next: (pedidos) => this.pedidosCliente = pedidos,
-      error: (err) => console.error('Error cargando mis pedidos en dashboard:', err)
-    });
+  cargarDatosDashboard() {
+    if (this.isAdmin) {
+      this.http.get<any>(`${environment.apiUrl}/reports/summary`).subscribe({
+        next: (res) => this.resumenAdmin = res || {},
+        error: (err) => console.error('Error cargando resumen admin:', err)
+      });
+    } else if (this.isCustomer) {
+      const accounts = this.msalService.instance.getAllAccounts();
+      const email = accounts.length > 0 ? accounts[0].username : '';
+      this.http.get<any[]>(`${environment.apiUrl}/orders/customer?email=${email}`).subscribe({
+        next: (res) => this.pedidosCliente = res || [],
+        error: (err) => console.error('Error cargando pedidos de cliente:', err)
+      });
+    } else if (this.isOperator) {
+      this.http.get<any[]>(`${environment.apiUrl}/orders/pending`).subscribe({
+        next: (res) => this.pedidosOperador = res || [],
+        error: (err) => console.error('Error cargando pendientes de operador:', err)
+      });
+    }
   }
 }

@@ -1,0 +1,6 @@
+.sidebar-nav a.active {
+  background-color: #eff6ff !important;
+  color: #2563eb !important;
+  font-weight: 600;
+  border-radius: 8px;
+}

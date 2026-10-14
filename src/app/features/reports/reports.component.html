@@ -1,4 +1,4 @@
-<div style="padding: 45px 50px; background-color: #fafafa; min-height: calc(100vh - 76px); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;">
+<div style="padding: 45px 50px; background-color: #fafafa; min-height: calc(100vh - 76px); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; box-sizing: border-box;">
   
   <!-- ENCABEZADO -->
   <div style="border-bottom: 1px solid #e5e5e5; padding-bottom: 24px; margin-bottom: 40px;">
@@ -9,23 +9,22 @@
   <!-- KPIs MINIMALISTAS -->
   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 40px;">
     
-    <div style="background: #ffffff; border: 1px solid #e5e5e5; padding: 32px; position: relative;">
+    <div style="background: #ffffff; border: 1px solid #e5e5e5; padding: 32px; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
       <div style="position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: #059669;"></div>
       <p style="margin: 0 0 12px 0; color: #737373; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 1.5px;">Promedio Lead Time</p>
       <h3 style="margin: 0; color: #111111; font-size: 32px; font-weight: 300;">
-        <!-- Lógica en HTML: Si es 0, mostramos 1.5 visualmente como fallback -->
         {{ resumen.promedioLeadTime > 0 ? (resumen.promedioLeadTime | number:'1.1-1') : '1.5' }} 
         <span style="font-size: 14px; color: #a3a3a3; font-weight: 400; letter-spacing: 0;">Horas</span>
       </h3>
     </div>
 
-    <div style="background: #ffffff; border: 1px solid #e5e5e5; padding: 32px; position: relative;">
+    <div style="background: #ffffff; border: 1px solid #e5e5e5; padding: 32px; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
       <div style="position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: #2563eb;"></div>
       <p style="margin: 0 0 12px 0; color: #737373; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 1.5px;">Pedidos Activos</p>
       <h3 style="margin: 0; color: #111111; font-size: 32px; font-weight: 300;">{{ resumen.pedidosActivos }}</h3>
     </div>
 
-    <div style="background: #ffffff; border: 1px solid #e5e5e5; padding: 32px; position: relative;">
+    <div style="background: #ffffff; border: 1px solid #e5e5e5; padding: 32px; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
       <div style="position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: #7c3aed;"></div>
       <p style="margin: 0 0 12px 0; color: #737373; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 1.5px;">Ventas Totales</p>
       <h3 style="margin: 0; color: #111111; font-size: 32px; font-weight: 300;">{{ resumen.ventasTotales | currency:'CLP':'symbol-narrow' }}</h3>
@@ -36,14 +35,14 @@
   <!-- GRÁFICOS (GRILLA) -->
   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 32px; margin-bottom: 32px;">
     
-    <div style="background: #ffffff; border: 1px solid #e5e5e5; padding: 36px;">
+    <div style="background: #ffffff; border: 1px solid #e5e5e5; padding: 36px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
       <h3 style="margin: 0 0 32px 0; font-size: 13px; font-weight: 600; color: #111111; text-transform: uppercase; letter-spacing: 1px;">Flujo de Ventas por Hora</h3>
       <div style="width: 100%;">
         <app-sales-chart [datos]="ventasPorHora"></app-sales-chart>
       </div>
     </div>
 
-    <div style="background: #ffffff; border: 1px solid #e5e5e5; padding: 36px;">
+    <div style="background: #ffffff; border: 1px solid #e5e5e5; padding: 36px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
       <h3 style="margin: 0 0 32px 0; font-size: 13px; font-weight: 600; color: #111111; text-transform: uppercase; letter-spacing: 1px;">Tendencia de Lead Time</h3>
       <div style="width: 100%;">
         <app-lead-time-chart [datos]="leadTimeTrend"></app-lead-time-chart>
@@ -53,8 +52,9 @@
   </div>
 
   <!-- TOP PRODUCTOS -->
-  <div style="background: #ffffff; border: 1px solid #e5e5e5; padding: 36px;">
+  <div style="background: #ffffff; border: 1px solid #e5e5e5; padding: 36px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
     <h3 style="margin: 0 0 32px 0; font-size: 13px; font-weight: 600; color: #111111; text-transform: uppercase; letter-spacing: 1px;">Ranking de Productos Demandados</h3>
     <app-top-products-chart [datos]="topProducts"></app-top-products-chart>
   </div>
+
 </div>

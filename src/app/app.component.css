@@ -1,60 +1,62 @@
-/* Importar una tipografía moderna y geométrica para interfaces (Inter) */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 .app-layout {
   display: flex;
   height: 100vh;
-  /* Fondo general gris frío muy claro, descansa la vista */
   background-color: #f8fafc; 
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow: hidden;
 }
 
-/* BARRA LATERAL - Adiós al borde derecho, hola sombra sutil */
 .sidebar {
   width: 270px;
   background-color: #ffffff;
-  border-right: none; 
-  box-shadow: 1px 0 20px rgba(0, 0, 0, 0.03); /* Separación por profundidad, no por línea */
+  box-shadow: 1px 0 20px rgba(0, 0, 0, 0.03); 
   display: flex;
   flex-direction: column;
   z-index: 10;
+  justify-content: space-between;
 }
 
 .brand {
-  padding: 32px 30px 24px;
+  padding: 28px 24px 16px;
   font-size: 20px;
   font-weight: 700;
   color: #0f172a;
-  border-bottom: none; /* Cabecera limpia */
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   letter-spacing: -0.5px;
 }
 
 .brand-icon {
   color: #2563eb;
-  font-size: 24px;
+  font-size: 20px;
+  background: #eff6ff;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
 }
 
 .nav-menu {
-  padding: 10px 16px; /* Espacio para que los botones "floten" dentro de la barra */
+  padding: 10px 16px; 
   display: flex;
   flex-direction: column;
-  gap: 8px; /* Separación entre botones */
+  gap: 6px; 
+  flex: 1;
 }
 
-/* LINKS DE NAVEGACIÓN - Formato Píldora (Pill) */
 .nav-link {
-  padding: 12px 18px;
+  padding: 12px 16px;
   color: #64748b;
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
-  border-radius: 10px; /* Curvas suaves, no cuadradas */
-  border-left: none;
-  transition: all 0.25s ease;
+  border-radius: 10px; 
+  transition: all 0.2s ease;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -63,21 +65,13 @@
 .nav-link:hover {
   background-color: #f1f5f9;
   color: #0f172a;
-  transform: translateX(4px); /* Micro-interacción: Pequeño salto a la derecha al pasar el mouse */
+  transform: translateX(3px); 
 }
 
-/* LINK ACTIVO - Contraste alto corporativo (estilo Vercel/Linear) */
 .active-link {
-  background-color: #0f172a; /* Fondo casi negro */
-  color: #ffffff !important;
+  background-color: #eff6ff !important; 
+  color: #2563eb !important; 
   font-weight: 600;
-  border-left: none;
-  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.1), 0 2px 4px -1px rgba(15, 23, 42, 0.06);
-}
-
-.active-link:hover {
-  transform: none; /* El elemento activo no salta */
-  background-color: #1e293b;
 }
 
 .main-wrapper {
@@ -87,50 +81,99 @@
   background-color: #f8fafc;
 }
 
-/* HEADER SUPERIOR - Se funde con el fondo, empujando la interfaz a la derecha */
 .top-header {
-  height: 76px;
-  background-color: transparent; 
-  border-bottom: none; 
+  height: 72px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0; 
   display: flex;
-  justify-content: flex-end; /* Alinea los controles a la derecha */
+  justify-content: space-between; 
   align-items: center;
   padding: 0 40px;
 }
 
-.header-status {
+.breadcrumb {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 12px;
-  color: #059669;
+  gap: 8px;
+}
+
+.breadcrumb span.current {
+  color: #0f172a;
   font-weight: 600;
-  background: #ecfdf5; /* Fondo verde pastel ultra suave */
-  padding: 8px 16px;
-  border-radius: 20px;
-  margin-right: 20px; /* Separación del botón de logout */
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  background: #f1f5f9;
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  text-align: right;
+}
+
+.user-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.user-role-label {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.divider {
+  width: 1px;
+  height: 24px;
+  background-color: #e2e8f0;
 }
 
 .status-dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   background-color: #10b981;
   border-radius: 50%;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); /* Efecto de pulso / antena estática */
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); 
 }
 
-/* BOTÓN CERRAR SESIÓN - Táctico y delineado */
 .logout-btn {
   background: white;
   border: 1px solid #e2e8f0;
   color: #475569;
   font-size: 13px;
   font-weight: 600;
-  padding: 8px 20px;
+  padding: 8px 16px;
   border-radius: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .logout-btn:hover {
@@ -142,5 +185,4 @@
 .content-area {
   flex: 1;
   overflow-y: auto;
-  /* El padding interno ya se maneja dentro de cada vista (ej. dashboard.component.html) */
 }

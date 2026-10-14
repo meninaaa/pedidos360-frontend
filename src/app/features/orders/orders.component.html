@@ -1,216 +1,330 @@
-<!-- Alerta Flotante de Éxito/Error - Diseño Minimalista -->
-<div *ngIf="notificacion" 
-     style="position: fixed; top: 24px; left: 50%; transform: translateX(-50%); 
-            background-color: #0f172a; color: white; padding: 14px 24px; 
-            border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); 
-            z-index: 9999; font-weight: 500; font-size: 13px; 
-            display: flex; align-items: center; gap: 12px; letter-spacing: 0.3px;">
-  <span style="color: #10b981; font-size: 16px;">✓</span> {{ notificacion }}
-</div>
-
 <div style="padding: 40px 50px; background-color: transparent; min-height: calc(100vh - 76px); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;">
   
+  <!-- ALERTA FLOTANTE -->
+  <div *ngIf="notificacion" 
+       style="position: fixed; top: 24px; left: 50%; transform: translateX(-50%); 
+              background-color: #0f172a; color: white; padding: 12px 24px; 
+              border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); 
+              z-index: 9999; font-weight: 500; font-size: 13px; 
+              display: flex; align-items: center; gap: 10px;">
+    <span style="color: #10b981; font-weight: bold;">[OK]</span> {{ notificacion }}
+  </div>
+
   <!-- ENCABEZADO DE LA VISTA -->
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; border-bottom: 1px solid #e2e8f0; padding-bottom: 24px;">
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
     <div>
-      <h2 style="margin: 0; font-size: 24px; color: #0f172a; font-weight: 600; letter-spacing: -0.5px;">
-        {{ isCustomer ? 'Mis Pedidos' : 'Gestión de Operaciones' }}
+      <h2 style="margin: 0; font-size: 26px; color: #0f172a; font-weight: 700; letter-spacing: -0.5px;">
+        {{ isCustomer ? 'Mis Pedidos' : 'Pedidos' }}
       </h2>
       <p style="color: #64748b; font-size: 14px; margin: 6px 0 0 0;">
-        {{ isCustomer ? 'Historial y seguimiento de tus requerimientos.' : 'Control centralizado de despachos y flujos de trabajo.' }}
+        {{ isCustomer ? 'Historial y seguimiento de sus requerimientos corporativos.' : 'Control centralizado de despachos y flujos operativos.' }}
       </p>
     </div>
     
     <button (click)="mostrarFormulario = !mostrarFormulario" 
-            style="background: #0f172a; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 500; font-size: 13px; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.1);"
-            onmouseover="this.style.backgroundColor='#1e293b'" onmouseout="this.style.backgroundColor='#0f172a'">
-      {{ mostrarFormulario ? 'Descartar Operación' : 'Nuevo Pedido' }}
+            style="background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">
+      {{ mostrarFormulario ? 'Descartar Operación' : '+ Nuevo Pedido' }}
     </button>
   </div>
 
-  <!-- FORMULARIO DE CREACIÓN (CARRITO) -->
-  <div *ngIf="mostrarFormulario" style="background: white; padding: 32px; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); margin-bottom: 35px; border: 1px solid #e2e8f0;">
-    <h3 style="margin: 0 0 24px 0; font-size: 16px; color: #0f172a; font-weight: 600; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px;">
-      <span style="color: #3b82f6;">◆</span> Configurar Nuevo Pedido
+  <!-- BARRA DE FILTROS SUPERIOR -->
+  <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px; margin-bottom: 24px; align-items: center;">
+    <div style="position: relative;">
+      <svg style="position: absolute; left: 14px; top: 12px; stroke: #94a3b8;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="text" [(ngModel)]="filtroTexto" placeholder="Buscar por folio o cliente..." style="width: 100%; box-sizing: border-box; padding: 10px 14px 10px 38px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #0f172a; outline: none; background: white;">
+    </div>
+    <div>
+      <select [(ngModel)]="filtroEstado" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #475569; background: white; outline: none; cursor: pointer;">
+        <option value="">Todos los estados</option>
+        <option value="CREADO">Creado</option>
+        <option value="ACEPTADO">Aceptado</option>
+        <option value="EN_PREPARACION">En preparación</option>
+        <option value="DESPACHADO">Despachado</option>
+        <option value="ENTREGADO">Entregado</option>
+        <option value="CANCELADO">Cancelado</option>
+      </select>
+    </div>
+    <div>
+      <input type="date" [(ngModel)]="filtroFecha" style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #475569; outline: none; background: white;">
+    </div>
+  </div>
+
+  <!-- FORMULARIO DE NUEVO PEDIDO / CARRITO -->
+  <div *ngIf="mostrarFormulario" style="background: white; padding: 28px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 28px; border: 1px solid #e2e8f0;">
+    <h3 style="margin: 0 0 20px 0; font-size: 16px; color: #0f172a; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+      <span style="color: #2563eb; font-weight: bold;">[+]</span> Configurar Nueva Orden Comercial
     </h3>
     
-    <div style="margin-bottom: 24px;">
-      <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; color: #64748b;">Cliente / Cuenta</label>
+    <div style="margin-bottom: 20px;">
+      <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; color: #64748b;">Cliente / Cuenta Corporativa</label>
       <input type="text" [(ngModel)]="nuevoCliente" [disabled]="isCustomer" 
              [ngStyle]="{'background-color': isCustomer ? '#f8fafc' : 'white', 'cursor': isCustomer ? 'not-allowed' : 'text', 'color': isCustomer ? '#94a3b8' : '#0f172a'}"
-             placeholder="Identificador de la empresa" 
-             style="width: 100%; max-width: 400px; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s;"
-             onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#cbd5e1'">
+             placeholder="Identificador de la cuenta" 
+             style="width: 100%; max-width: 400px; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
     </div>
 
-    <!-- Agregar al Carrito -->
-    <div style="display: grid; grid-template-columns: 2fr 100px auto; gap: 16px; align-items: end; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px dashed #e2e8f0;">
+    <!-- SELECCIÓN DE PRODUCTOS E ÍTEMS CON CONTROLES MODERNOS (- / +) -->
+    <div style="display: grid; grid-template-columns: 2fr 180px auto; gap: 16px; align-items: end; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px dashed #e2e8f0;">
       <div>
-        <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; color: #64748b;">Añadir Ítem al Pedido</label>
+        <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; color: #64748b;">Seleccionar Producto</label>
         <select [(ngModel)]="productoSeleccionadoId" 
-                style="width: 100%; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; font-size: 14px; color: #0f172a; outline: none; cursor: pointer;">
-          <option [ngValue]="null" disabled selected>Selecciona un producto disponible...</option>
+                style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; font-size: 13px; color: #0f172a; outline: none; cursor: pointer;">
+          <option [ngValue]="null" disabled selected>Seleccione producto del catálogo...</option>
           <option *ngFor="let p of productosDisponibles" [ngValue]="p.id">
             {{ p.nombre || p.name }} — {{ (p.precio || p.price) | currency:'CLP':'symbol-narrow' }}
           </option>
         </select>
       </div>
+
+      <!-- SELECTOR DE CANTIDAD FLUIDO -->
       <div>
-        <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; color: #64748b;">Cant.</label>
-        <input type="number" [(ngModel)]="cantidadSeleccionada" min="1" style="width: 100%; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; color: #0f172a;">
+        <label style="display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; color: #64748b;">Cantidad</label>
+        <div style="display: flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: white;">
+          <button type="button" (click)="cantidadSeleccionada = cantidadSeleccionada > 1 ? cantidadSeleccionada - 1 : 1" 
+                  style="background: #f8fafc; border: none; padding: 10px 14px; cursor: pointer; color: #475569; font-weight: 700; font-size: 14px;">-</button>
+          
+          <input type="text" [(ngModel)]="cantidadSeleccionada" readonly 
+                 style="width: 100%; border: none; text-align: center; font-size: 13px; font-weight: 600; color: #0f172a; outline: none; background: white; padding: 10px 0;">
+          
+          <button type="button" (click)="cantidadSeleccionada = cantidadSeleccionada + 1" 
+                  style="background: #f8fafc; border: none; padding: 10px 14px; cursor: pointer; color: #475569; font-weight: 700; font-size: 14px;">+</button>
+        </div>
       </div>
+
       <div>
-        <button (click)="agregarAlCarrito()" style="background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.backgroundColor='#e2e8f0'" onmouseout="this.style.backgroundColor='#f1f5f9'">
-          + Agregar
+        <button (click)="agregarAlCarrito()" style="background: #0f172a; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+          Añadir Ítem
         </button>
       </div>
     </div>
 
-    <!-- Lista Resumen del Carrito -->
-    <div *ngIf="carrito.length > 0" style="margin-bottom: 24px;">
-      <h4 style="margin: 0 0 12px 0; font-size: 13px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Resumen del Carrito</h4>
+    <!-- DESGLOSE DE CARRITO -->
+    <div *ngIf="carrito.length > 0" style="margin-bottom: 20px;">
       <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
-        <div *ngFor="let item of carrito; let i = index" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
-          <div style="font-size: 14px; color: #0f172a;">
-            <span style="font-weight: 600; margin-right: 8px;">{{ item.quantity }}x</span> {{ item.nombre }}
+        <div *ngFor="let item of carrito; let i = index" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #e2e8f0;">
+          <div style="font-size: 13px; color: #0f172a; display: flex; align-items: center; gap: 12px;">
+            <div style="display: flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 6px; background: white; overflow: hidden;">
+              <button type="button" (click)="cambiarCantidadItem(i, -1)" style="background: #f8fafc; border: none; padding: 4px 8px; cursor: pointer; font-size: 11px; font-weight: bold;">-</button>
+              <span style="padding: 0 8px; font-size: 12px; font-weight: 600;">{{ item.quantity }}</span>
+              <button type="button" (click)="cambiarCantidadItem(i, 1)" style="background: #f8fafc; border: none; padding: 4px 8px; cursor: pointer; font-size: 11px; font-weight: bold;">+</button>
+            </div>
+            <span>{{ item.nombre }}</span>
           </div>
           <div style="display: flex; align-items: center; gap: 16px;">
-            <span style="font-weight: 500; color: #0f172a;">{{ item.subtotal | currency:'CLP':'symbol-narrow' }}</span>
-            <button (click)="quitarDelCarrito(i)" style="background: none; border: none; color: #ef4444; font-size: 18px; cursor: pointer; padding: 0;" title="Quitar Ítem">&times;</button>
+            <span style="font-weight: 600; color: #0f172a; font-size: 13px;">{{ item.subtotal | currency:'CLP':'symbol-narrow' }}</span>
+            <button (click)="quitarDelCarrito(i)" style="background: none; border: none; color: #ef4444; font-size: 16px; cursor: pointer; font-weight: bold;" title="Quitar ítem">&times;</button>
           </div>
         </div>
         
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 8px;">
-          <span style="font-size: 14px; font-weight: 600; color: #64748b; text-transform: uppercase;">Total Consolidado:</span>
-          <span style="font-size: 20px; font-weight: 700; color: #10b981;">{{ nuevoTotal | currency:'CLP':'symbol-narrow' }}</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 8px;">
+          <span style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Estimado:</span>
+          <span style="font-size: 18px; font-weight: 700; color: #10b981;">{{ nuevoTotal | currency:'CLP':'symbol-narrow' }}</span>
         </div>
       </div>
     </div>
 
     <div style="display: flex; justify-content: flex-end;">
-      <button (click)="guardarPedido()" [disabled]="carrito.length === 0" [ngStyle]="{'opacity': carrito.length === 0 ? '0.5' : '1', 'cursor': carrito.length === 0 ? 'not-allowed' : 'pointer'}" style="background: #2563eb; color: white; border: none; padding: 12px 32px; border-radius: 8px; font-weight: 500; font-size: 14px; transition: all 0.2s; display: flex; align-items: center; gap: 8px;">
-        <span>Procesar Orden Completa</span> &rarr;
+      <button (click)="guardarPedido()" [disabled]="carrito.length === 0" [ngStyle]="{'opacity': carrito.length === 0 ? '0.5' : '1'}" style="background: #2563eb; color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">
+        Emitir Orden Comercial &rarr;
       </button>
     </div>
   </div>
 
-  <!-- TABLA PRINCIPAL DE DATOS -->
+  <!-- TABLA PRINCIPAL DE PEDIDOS -->
   <div style="background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; overflow: hidden;">
+    <div style="padding: 16px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+      <h3 style="margin: 0; font-size: 14px; font-weight: 700; color: #0f172a;">
+        Registro de Pedidos <span style="color: #64748b; font-weight: 400; font-size: 12px; margin-left: 8px;">({{ pedidosFiltrados.length }} registros)</span>
+      </h3>
+      <span style="font-size: 12px; color: #64748b;">Ordenados por ID</span>
+    </div>
+
     <div style="overflow-x: auto;">
       <table style="width: 100%; border-collapse: collapse; text-align: left;">
         <thead>
           <tr style="background-color: #f8fafc;">
-            <th style="padding: 16px 24px; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0;">Folio</th>
-            <th style="padding: 16px 24px; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0;">Identificador de Cliente</th>
-            <th style="padding: 16px 24px; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0;">Registro</th>
-            <th style="padding: 16px 24px; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0;">Monto Base</th>
-            <th style="padding: 16px 24px; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0;">Estado de Operación</th>
-            <th style="padding: 16px 24px; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0; text-align: right;">Opciones</th>
+            <th style="padding: 14px 24px; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0;">Folio</th>
+            <th style="padding: 14px 24px; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0;">Cliente</th>
+            <th style="padding: 14px 24px; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0;">Fecha de Creación</th>
+            <th style="padding: 14px 24px; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0;">Monto Total</th>
+            <th style="padding: 14px 24px; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0;">Estado</th>
+            <th style="padding: 14px 24px; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0; text-align: right;">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let pedido of pedidos" style="transition: background 0.2s;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='transparent'">
-            <td style="padding: 18px 24px; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-weight: 600; font-size: 14px;">#{{ pedido.id }}</td>
-            <td style="padding: 18px 24px; border-bottom: 1px solid #f1f5f9; color: #475569; font-size: 14px;">{{ pedido.customerId }}</td>
-            <td style="padding: 18px 24px; border-bottom: 1px solid #f1f5f9; color: #64748b; font-size: 13px;">{{ pedido.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
-            <td style="padding: 18px 24px; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-weight: 500; font-size: 14px;">{{ pedido.total | currency:'CLP':'symbol-narrow' }}</td>
+          <tr *ngFor="let pedido of pedidosFiltrados" style="transition: background 0.2s;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='transparent'">
+            <td style="padding: 16px 24px; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-weight: 700; font-size: 13px;">#{{ pedido.id }}</td>
+            <td style="padding: 16px 24px; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-size: 13px; font-weight: 500;">{{ pedido.customerId }}</td>
+            <td style="padding: 16px 24px; border-bottom: 1px solid #f1f5f9; color: #64748b; font-size: 13px;">{{ pedido.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td style="padding: 16px 24px; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-weight: 600; font-size: 13px;">{{ pedido.total | currency:'CLP':'symbol-narrow' }}</td>
             
-            <td style="padding: 18px 24px; border-bottom: 1px solid #f1f5f9;">
-              <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: #334155;">
-                <span style="font-size: 10px;" 
-                      [ngStyle]="{
-                        'color': (pedido.status === 'EN_PREPARACION') ? '#f59e0b' : 
-                                 (pedido.status === 'DESPACHADO' || pedido.status === 'ENTREGADO' || pedido.status === 'ACEPTADO') ? '#10b981' : 
-                                 (pedido.status === 'CANCELADO') ? '#ef4444' : '#3b82f6'
-                      }">●</span>
-                {{ pedido.status }}
-              </div>
+            <td style="padding: 16px 24px; border-bottom: 1px solid #f1f5f9;">
+              <span [ngStyle]="{
+                'background': (pedido.status === 'EN_PREPARACION') ? '#fff7ed' : 
+                            (pedido.status === 'DESPACHADO' || pedido.status === 'ACEPTADO') ? '#eff6ff' : 
+                            (pedido.status === 'ENTREGADO') ? '#ecfdf5' : 
+                            (pedido.status === 'CANCELADO') ? '#fef2f2' : '#f1f5f9',
+                'color': (pedido.status === 'EN_PREPARACION') ? '#c2410c' : 
+                       (pedido.status === 'DESPACHADO' || pedido.status === 'ACEPTADO') ? '#2563eb' : 
+                       (pedido.status === 'ENTREGADO') ? '#059669' : 
+                       (pedido.status === 'CANCELADO') ? '#dc2626' : '#475569'
+              }" style="font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px;">
+                <span>[•]</span> {{ pedido.status }}
+              </span>
             </td>
             
-            <td style="padding: 18px 24px; border-bottom: 1px solid #f1f5f9; text-align: right;">
-              <div style="display: flex; justify-content: flex-end; gap: 8px;">
+            <!-- ACCIONES Y BOTONES -->
+            <td style="padding: 16px 24px; border-bottom: 1px solid #f1f5f9; text-align: right;">
+              <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px;">
                 
+                <!-- Acciones operativas para Admin / Operador -->
                 <ng-container *ngIf="!isCustomer">
-                  <button *ngIf="pedido.status === 'CREADO'" style="background: none; border: none; padding: 6px 10px; cursor: pointer; color: #3b82f6; font-size: 13px; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='#1d4ed8'" onmouseout="this.style.color='#3b82f6'" (click)="cambiarEstado(pedido.id, 'ACEPTADO')">Aceptar</button>
-                  <button *ngIf="pedido.status === 'ACEPTADO'" style="background: none; border: none; padding: 6px 10px; cursor: pointer; color: #f59e0b; font-size: 13px; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='#b45309'" onmouseout="this.style.color='#f59e0b'" (click)="cambiarEstado(pedido.id, 'EN_PREPARACION')">Preparar</button>
-                  <button *ngIf="pedido.status === 'EN_PREPARACION'" style="background: none; border: none; padding: 6px 10px; cursor: pointer; color: #10b981; font-size: 13px; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='#047857'" onmouseout="this.style.color='#10b981'" (click)="cambiarEstado(pedido.id, 'DESPACHADO')">Despachar</button>
+                  <button *ngIf="pedido.status === 'CREADO'" style="background: white; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; cursor: pointer; color: #0f172a; font-size: 12px; font-weight: 600;" (click)="cambiarEstado(pedido.id, 'ACEPTADO')">Aceptar</button>
+                  <button *ngIf="pedido.status === 'ACEPTADO'" style="background: white; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; cursor: pointer; color: #0f172a; font-size: 12px; font-weight: 600;" (click)="cambiarEstado(pedido.id, 'EN_PREPARACION')">Preparar</button>
+                  <button *ngIf="pedido.status === 'EN_PREPARACION'" style="background: white; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 6px; cursor: pointer; color: #0f172a; font-size: 12px; font-weight: 600;" (click)="cambiarEstado(pedido.id, 'DESPACHADO')">Despachar</button>
                 </ng-container>
-                
+
+                <!-- Botón de Pago para el Cliente (solo cuando está CREADO) -->
                 <button *ngIf="isCustomer && pedido.status === 'CREADO'" 
-                        style="background: #e11d48; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-weight: 500; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 0.2s; box-shadow: 0 2px 4px rgba(225, 29, 72, 0.2);" 
-                        onmouseover="this.style.backgroundColor='#be123c'" onmouseout="this.style.backgroundColor='#e11d48'"
+                        style="background: #e11d48; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;"
                         (click)="iniciarPagoWebpay(pedido.id, pedido.total)">
-                  Pagar
+                  Pagar Webpay
                 </button>
 
-                <button *ngIf="(isCustomer && pedido.status !== 'CREADO') || (!isCustomer && (pedido.status === 'DESPACHADO' || pedido.status === 'ENTREGADO' || pedido.status === 'CANCELADO'))" 
-                        style="background: none; border: none; padding: 6px 10px; cursor: pointer; color: #64748b; font-size: 13px; font-weight: 500; text-decoration: underline; text-underline-offset: 4px; transition: color 0.2s;"
-                        onmouseover="this.style.color='#0f172a'" onmouseout="this.style.color='#64748b'"
-                        (click)="verDetalle(pedido)">
-                  Detalles
+                <!-- Botón de Detalles / Ver Boleta: Oculto para cliente en estado CREADO hasta que pague -->
+                <button *ngIf="!isCustomer || pedido.status !== 'CREADO'" 
+                        (click)="verDetalle(pedido)" 
+                        style="background: none; border: none; padding: 6px 10px; cursor: pointer; color: #2563eb; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                  {{ isCustomer ? 'Ver Boleta (PDF) &rarr;' : 'Detalles &rarr;' }}
                 </button>
+
               </div>
             </td>
           </tr>
 
-          <tr *ngIf="pedidos.length === 0">
-            <td colspan="6" style="padding: 60px 20px; text-align: center;">
-
-              <p style="color: #94a3b8; font-size: 14px; margin: 0; font-weight: 500;">No existen registros que coincidan con la búsqueda actual.</p>
+          <tr *ngIf="pedidosFiltrados.length === 0">
+            <td colspan="6" style="padding: 60px 20px; text-align: center; color: #94a3b8; font-size: 14px;">
+              No se encontraron registros de pedidos.
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-  </div>
 
-  <!-- MODAL DE DETALLES -->
-  <div *ngIf="pedidoSeleccionado" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px);">
-    
-    <div style="background: white; padding: 40px; border-radius: 16px; width: 100%; max-width: 480px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); font-family: 'Inter', sans-serif; position: relative;">
-      
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px;">
-        <div>
-          <p style="margin: 0 0 4px 0; font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Hoja de Ruta</p>
-          <h3 style="margin: 0; color: #0f172a; font-size: 24px; font-weight: 600; letter-spacing: -0.5px;">Operación #{{ pedidoSeleccionado.id }}</h3>
-        </div>
-        <span style="border: 1px solid #e2e8f0; color: #475569; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
-          <span style="font-size: 8px; color: #10b981;">●</span> {{ pedidoSeleccionado.status }}
-        </span>
-      </div>
-      
-      <div style="background: #f8fafc; border-radius: 8px; padding: 20px; margin-bottom: 24px; border: 1px solid #f1f5f9;">
-        <div style="margin-bottom: 16px;">
-          <span style="color: #64748b; font-size: 12px; display: block; margin-bottom: 4px; font-weight: 500;">Identificador de Cuenta</span>
-          <strong style="color: #0f172a; font-size: 14px; font-weight: 500;">{{ pedidoSeleccionado.customerId }}</strong>
-        </div>
-
-        <div style="margin-bottom: 16px;">
-          <span style="color: #64748b; font-size: 12px; display: block; margin-bottom: 8px; font-weight: 500;">Desglose del Pedido</span>
-          
-          <ul *ngIf="pedidoSeleccionado.items && pedidoSeleccionado.items.length > 0" style="margin: 0; padding-left: 18px; color: #0f172a; font-size: 14px;">
-            <li *ngFor="let item of pedidoSeleccionado.items" style="margin-bottom: 6px;">
-              <strong style="font-weight: 600;">{{ item.quantity }}x</strong> {{ obtenerNombreProducto(item.productId) }}
-            </li>
-          </ul>
-
-          <div *ngIf="!pedidoSeleccionado.items || pedidoSeleccionado.items.length === 0">
-            <strong style="color: #0f172a; font-size: 14px; font-weight: 500;">{{ obtenerNombreProducto(pedidoSeleccionado.productId) }}</strong>
-            <span style="color: #94a3b8; font-size: 12px; margin-left: 8px;">(Ref: #{{ pedidoSeleccionado.productId }})</span>
-          </div>
-        </div>
-      </div>
-
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 24px; border-bottom: 1px solid #e2e8f0; margin-bottom: 24px;">
-        <span style="color: #64748b; font-size: 13px; font-weight: 500;">Total Facturado</span>
-        <strong style="color: #0f172a; font-size: 24px; font-weight: 300;">{{ pedidoSeleccionado.total | currency:'CLP':'symbol-narrow' }}</strong>
-      </div>
-      
-      <div style="display: flex; justify-content: flex-end;">
-        <button (click)="cerrarDetalle()" style="background: white; color: #0f172a; border: 1px solid #cbd5e1; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 14px; transition: all 0.2s;" onmouseover="this.style.backgroundColor='#f1f5f9'" onmouseout="this.style.backgroundColor='white'">
-          Cerrar Vista
-        </button>
+    <!-- PAGINACIÓN -->
+    <div style="padding: 16px 24px; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+      <span style="font-size: 13px; color: #64748b;">Mostrando 1 - {{ pedidosFiltrados.length }} de {{ pedidosFiltrados.length }} registros</span>
+      <div style="display: flex; gap: 8px;">
+        <button style="background: white; border: 1px solid #cbd5e1; color: #475569; font-size: 13px; padding: 6px 14px; border-radius: 6px; cursor: pointer;">Anterior</button>
+        <button style="background: #2563eb; border: 1px solid #2563eb; color: white; font-weight: 600; font-size: 13px; padding: 6px 12px; border-radius: 6px; cursor: pointer;">1</button>
+        <button style="background: white; border: 1px solid #cbd5e1; color: #475569; font-size: 13px; padding: 6px 14px; border-radius: 6px; cursor: pointer;">Siguiente</button>
       </div>
     </div>
+  </div>
+
+</div>
+
+<!-- MODAL DE BOLETA ELECTRÓNICA FORMAL (SII) -->
+<div *ngIf="pedidoSeleccionado" 
+     style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); display: flex; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(4px);">
+  
+  <div style="background: white; padding: 32px; border-radius: 16px; width: 100%; max-width: 480px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); font-family: 'Inter', sans-serif;">
+    
+    <!-- CONTENEDOR EXCLUSIVO PARA IMPRESIÓN / PDF (PEDIDOS360 SPA) -->
+    <div id="area-boleta-fiscal" style="background: #fff; padding: 20px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 20px; font-family: 'Courier New', Courier, monospace;">
+      
+      <!-- ENCABEZADO EMPRESA -->
+      <div style="text-align: center; margin-bottom: 14px;">
+        <h2 style="margin: 0; font-size: 16px; font-weight: bold; color: #000; letter-spacing: 0.5px;">PEDIDOS360 SPA</h2>
+        <p style="margin: 2px 0; font-size: 11px; color: #333;">R.U.T.: 76.543.210-K</p>
+        <p style="margin: 2px 0; font-size: 11px; color: #333;">Comercializadora B2B y Distribución Mayorista</p>
+        <p style="margin: 2px 0; font-size: 11px; color: #333;">Av. Providencia 1234, Of. 502, Santiago</p>
+      </div>
+
+      <div style="border-bottom: 1px dashed #000; margin: 10px 0;"></div>
+
+      <!-- TÍTULO DOCUMENTO TRIBUTARIO -->
+      <div style="text-align: center; margin-bottom: 12px;">
+        <h3 style="margin: 0; font-size: 14px; font-weight: bold; color: #000;">BOLETA ELECTRÓNICA</h3>
+        <p style="margin: 2px 0; font-size: 13px; font-weight: bold; color: #dc2626;">N° {{ pedidoSeleccionado.id }}</p>
+      </div>
+
+      <div style="font-size: 11px; margin-bottom: 10px; color: #222;">
+        <div><strong>Fecha Emisión:</strong> {{ pedidoSeleccionado.createdAt | date:'dd/MM/yyyy HH:mm' }}</div>
+        <div><strong>RUT / Cliente:</strong> {{ pedidoSeleccionado.customerId }}</div>
+        <div><strong>Medio de Pago:</strong> Webpay Plus (Transbank)</div>
+        <div><strong>Estado Orden:</strong> {{ pedidoSeleccionado.status }}</div>
+      </div>
+
+      <div style="border-bottom: 1px dashed #000; margin: 10px 0;"></div>
+
+      <!-- DETALLE DE ÍTEMS -->
+      <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px;">
+        <thead>
+          <tr style="border-bottom: 1px solid #000;">
+            <th style="padding: 4px 0; text-align: left;">DESCRIPCIÓN / CANT.</th>
+            <th style="padding: 4px 0; text-align: right;">SUBTOTAL</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of pedidoSeleccionado.items" style="border-bottom: 1px dotted #cbd5e1;">
+            <td style="padding: 6px 0;">
+              <div style="font-weight: bold;">{{ obtenerNombreProducto(item.productId) }}</div>
+              <div style="color: #555; font-size: 10px;">Cantidad: {{ item.quantity }} unid.</div>
+            </td>
+            <td style="padding: 6px 0; text-align: right; vertical-align: top; font-weight: bold;">
+              {{ (item.subtotal || 0) | currency:'CLP':'symbol-narrow' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="border-bottom: 1px dashed #000; margin: 10px 0;"></div>
+
+      <!-- TOTALES Y DESGLOSE IVA -->
+      <div style="font-size: 11px; margin-bottom: 12px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+          <span>Monto Neto:</span>
+          <span>{{ getNeto(pedidoSeleccionado.total) | currency:'CLP':'symbol-narrow' }}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+          <span>I.V.A. (19%):</span>
+          <span>{{ getIva(pedidoSeleccionado.total) | currency:'CLP':'symbol-narrow' }}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; margin-top: 6px; border-top: 1px solid #000; padding-top: 6px;">
+          <span>TOTAL A PAGAR:</span>
+          <span style="color: #059669;">{{ pedidoSeleccionado.total | currency:'CLP':'symbol-narrow' }}</span>
+        </div>
+      </div>
+
+      <!-- TIMBRE ELECTRÓNICO S.I.I. -->
+      <div style="text-align: center; border: 1px solid #000; padding: 8px; margin-top: 15px; background: #fdfdfd;">
+        <div style="font-size: 9px; font-weight: bold; letter-spacing: 1px;">TIMBRE ELECTRÓNICO S.I.I.</div>
+        <div style="font-size: 8px; margin: 3px 0; color: #444;">Res. 80 de 2014 - Verifique documento en www.sii.cl</div>
+        <div style="font-size: 14px; font-family: monospace; letter-spacing: 3px; margin-top: 4px;">|||||| ||||| |||| ||||||||||</div>
+      </div>
+
+    </div>
+
+    <!-- BOTONES DE ACCIÓN SEPARADOS -->
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+      <div style="display: flex; gap: 8px;">
+        <button (click)="imprimirBoleta()" 
+                style="background: #2563eb; color: white; border: none; padding: 10px 14px; border-radius: 8px; font-weight: 600; font-size: 12px; cursor: pointer;">
+          Imprimir
+        </button>
+
+        <button (click)="descargarPDF()" 
+                style="background: #0d9488; color: white; border: none; padding: 10px 14px; border-radius: 8px; font-weight: 600; font-size: 12px; cursor: pointer;">
+          Descargar PDF
+        </button>
+      </div>
+
+      <button (click)="cerrarDetalle()" 
+              style="background: #0f172a; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; font-size: 12px; cursor: pointer;">
+        Cerrar
+      </button>
+    </div>
+
   </div>
 </div>

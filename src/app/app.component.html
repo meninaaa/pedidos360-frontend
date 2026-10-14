@@ -6,35 +6,47 @@
   <!-- Sidebar de Navegación -->
   <aside class="sidebar">
     <div class="brand">
-      <span class="brand-icon">⬡</span> Pedidos360
+      <span class="brand-icon">◆</span> Pedidos360
     </div>
     
+    <div class="nav-section-title" style="font-size: 11px; font-weight: 500; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; padding: 0 24px; margin: 8px 0;">
+      Espacio de trabajo
+    </div>
+
     <nav class="nav-menu">
-      <!-- Panel General: Visible para todos -->
       <a routerLink="/dashboard" routerLinkActive="active-link" class="nav-link">Panel General</a>
-      
-      <!-- Gestión Interna: Solo Admin y Operador -->
       <a *ngIf="isAdmin || isOperator" routerLink="/orders" routerLinkActive="active-link" class="nav-link">Gestión de Pedidos</a>
-      
-      <!-- Vista Cliente: Solo ve SUS pedidos -->
       <a *ngIf="isCustomer" routerLink="/orders" routerLinkActive="active-link" class="nav-link">Mis Pedidos</a>
-      
-      <!-- Catálogo: Visible para Admin, Operador (consulta) y Cliente -->
-      <a *ngIf="isAdmin || isOperator || isCustomer" routerLink="/catalog" routerLinkActive="active-link" class="nav-link">Catálogo de Productos</a>
-      
-      <!-- Reportería y Auditoría: Exclusivo del Administrador -->
+      <a routerLink="/catalog" routerLinkActive="active-link" class="nav-link">Catálogo de Productos</a>
       <a *ngIf="isAdmin" routerLink="/reports" routerLinkActive="active-link" class="nav-link">Reportería</a>
       <a *ngIf="isAdmin" routerLink="/audit" routerLinkActive="active-link" class="nav-link">Auditoría (Timeline)</a>
     </nav>
+
   </aside>
 
   <!-- Área Principal -->
   <div class="main-wrapper">
+   <!-- NAVBAR SUPERIOR -->
     <header class="top-header">
-      <div class="header-status">
-        <span class="status-dot"></span> Sesión activa (MSAL)
+      
+      <!-- Breadcrumb Dinámico -->
+      <div class="breadcrumb">
+        Espacio de trabajo <span>›</span> <span class="current">{{ currentRouteName }}</span>
       </div>
-      <button class="logout-btn" (click)="logout()">Cerrar Sesión</button>
+
+      <div class="header-controls">
+        <div class="user-profile">
+          <div class="user-avatar">{{ obtenerIniciales() }}</div>
+          <div class="user-info">
+            <span class="user-name">{{ userName }}</span>
+            <span class="user-role-label">{{ userRoleStr }}</span>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <button class="logout-btn" (click)="logout()">Cerrar Sesión</button>
+      </div>
     </header>
 
     <main class="content-area">

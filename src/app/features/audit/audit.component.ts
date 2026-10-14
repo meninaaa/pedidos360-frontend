@@ -38,11 +38,47 @@ export class AuditComponent implements OnInit {
     });
   }
 
+  // Métodos inteligentes para formatear títulos dinámicos a partir del payload JSON
+  obtenerTitulo(log: any): string {
+    try {
+      const data = JSON.parse(log.payload);
+      const orderId = data.orderId || data.id;
+      const status = data.status;
+      
+      if (orderId && status) {
+        return `Pedido #${orderId} cambió a ${status}`;
+      }
+      if (orderId && data.total) {
+        return `Operación registrada para Pedido #${orderId}`;
+      }
+    } catch (e) {
+      // Si el payload no es JSON puro
+    }
+    return log.eventType || 'Registro de Auditoría del Sistema';
+  }
+
+  obtenerSubtitulo(log: any): string {
+    try {
+      const data = JSON.parse(log.payload);
+      const cliente = data.customerId ? ` · ${data.customerId}` : '';
+      const monto = data.total ? ` · $${data.total.toLocaleString()}` : '';
+      return `${log.actor || 'SYSTEM'} · ${cliente}${monto}`;
+    } catch (e) {
+      return `${log.actor || 'SYSTEM'}`;
+    }
+  }
+
   get eventosFiltrados() {
     return this.eventos.filter(e => {
-      const matchUsuario = !this.filtroUsuario || (e.actor || '').toLowerCase().includes(this.filtroUsuario.toLowerCase());
-      const matchFecha = !this.filtroFecha || (e.timestamp || '').includes(this.filtroFecha);
-      const matchTipo = !this.filtroTipo || (e.eventType || '').toLowerCase().includes(this.filtroTipo.toLowerCase());
+      const actor = (e.actor || '').toLowerCase();
+      const timestamp = (e.timestamp || '');
+      const eventType = (e.eventType || '').toLowerCase();
+      const titulo = this.obtenerTitulo(e).toLowerCase();
+
+      const matchUsuario = !this.filtroUsuario || actor.includes(this.filtroUsuario.toLowerCase());
+      const matchFecha = !this.filtroFecha || timestamp.includes(this.filtroFecha);
+      const matchTipo = !this.filtroTipo || eventType.includes(this.filtroTipo.toLowerCase()) || titulo.includes(this.filtroTipo.toLowerCase());
+      
       return matchUsuario && matchFecha && matchTipo;
     });
   }
