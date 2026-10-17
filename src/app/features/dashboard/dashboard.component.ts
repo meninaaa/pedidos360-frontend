@@ -19,7 +19,7 @@ export class DashboardComponent implements OnInit {
   isOperator: boolean = false;
   isCustomer: boolean = false;
 
-  resumenAdmin: any = { ventasTotales: 0, pedidosActivos: 0, usuariosActivos: 0 };
+  resumenAdmin: any = { ventasTotales: 0, pedidosActivos: 0 };
   pedidosCliente: any[] = [];
   pedidosOperador: any[] = [];
 
@@ -74,13 +74,11 @@ export class DashboardComponent implements OnInit {
 
   cargarDatosDashboard() {
     if (this.isAdmin) {
-      // Carga los KPIs generales del admin
       this.http.get<any>(`${environment.apiUrl}/reports/summary`).subscribe({
         next: (res) => this.resumenAdmin = res || {},
         error: (err) => console.error('Error cargando resumen admin:', err)
       });
 
-      // ¡Importante! El administrador también necesita los pedidos pendientes para la tabla del dashboard
       this.http.get<any[]>(`${environment.apiUrl}/orders/pending`).subscribe({
         next: (res) => this.pedidosOperador = res || [],
         error: (err) => console.error('Error cargando pendientes para admin:', err)
