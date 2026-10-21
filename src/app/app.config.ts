@@ -7,8 +7,10 @@ import { PublicClientApplication, InteractionType } from '@azure/msal-browser';
 import { msalConfig } from './auth-config';
 import { environment } from '../environments/environment'; 
 
-export function MSALInstanceFactory() {
-  return new PublicClientApplication(msalConfig);
+export function MSALInstanceFactory(): PublicClientApplication {
+  const pca = new PublicClientApplication(msalConfig);
+  pca.initialize();
+  return pca;
 }
 
 export function MSALGuardConfigFactory(): MsalGuardConfiguration {
@@ -22,7 +24,6 @@ export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
   return {
     interactionType: InteractionType.Redirect,
     protectedResourceMap: new Map([
-      // Intercepta dinámicamente las llamadas basándose en el entorno actual
       [`${environment.apiUrl}/*`, ['api://d7430172-cf9c-438e-8a3a-210f88d2d23c/Backend.Read']]
     ])
   };
