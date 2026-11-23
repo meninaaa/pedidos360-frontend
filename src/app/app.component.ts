@@ -15,14 +15,14 @@ import { filter, takeUntil } from 'rxjs/operators';
 })
 export class AppComponent implements OnInit, OnDestroy {
   isLoggedIn = false;
-  
+
   isAdmin = false;
   isOperator = false;
   isCustomer = false;
 
   userName = '';
   userRoleStr = '';
-  currentRouteName = 'Resumen'; // Variable para el Breadcrumb dinámico
+  currentRouteName = 'Resumen';
 
   private readonly _destroying$ = new Subject<void>();
 
@@ -36,11 +36,15 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.authService.handleRedirectObservable().subscribe();
 
-    // Escuchar cambios de ruta para actualizar el Breadcrumb superior
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: any) => {
-        this.actualizarNombreRuta(event.urlAfterRedirects);
+        const currentUrl = event.urlAfterRedirects || event.url;
+        if (this.isLoggedIn && (currentUrl === '/login' || currentUrl === '/')) {
+          this.router.navigate(['/dashboard']);
+          return;
+        }
+        this.actualizarNombreRuta(currentUrl);
       });
 
     this.msalBroadcastService.msalSubject$
@@ -63,7 +67,6 @@ export class AppComponent implements OnInit, OnDestroy {
       });
   }
 
-  // Método que mapea la URL actual al texto del Breadcrumb
   actualizarNombreRuta(url: string) {
     if (url.includes('/dashboard')) {
       this.currentRouteName = 'Resumen';
@@ -75,6 +78,8 @@ export class AppComponent implements OnInit, OnDestroy {
       this.currentRouteName = 'Reportería';
     } else if (url.includes('/audit')) {
       this.currentRouteName = 'Auditoría';
+    } else if (url.includes('/kafka-admin')) {
+      this.currentRouteName = 'Administración Kafka';
     } else {
       this.currentRouteName = 'Plataforma';
     }
@@ -82,30 +87,34 @@ export class AppComponent implements OnInit, OnDestroy {
 
   checkAndSetActiveAccount() {
     let activeAccount = this.authService.instance.getActiveAccount();
-    
+
     if (!activeAccount && this.authService.instance.getAllAccounts().length > 0) {
       let accounts = this.authService.instance.getAllAccounts();
       this.authService.instance.setActiveAccount(accounts[0]);
       activeAccount = accounts[0];
     }
-    
+
     this.isLoggedIn = this.authService.instance.getAllAccounts().length > 0;
 
     if (this.isLoggedIn && activeAccount) {
       this.userName = activeAccount.name || 'Usuario';
       const claims: any = activeAccount.idTokenClaims;
-      const roles = claims?.roles || []; 
+      const roles = claims?.roles || [];
 
       this.isAdmin = roles.includes('Administrador') || roles.includes('Admin');
       this.isOperator = roles.includes('Operador de Logística') || roles.includes('Operador');
       this.isCustomer = roles.includes('Cliente') || roles.includes('Customer') || (!this.isAdmin && !this.isOperator);
-      
+
       if (this.isAdmin) {
         this.userRoleStr = 'Administrador';
       } else if (this.isOperator) {
         this.userRoleStr = 'Operador Logístico';
       } else {
         this.userRoleStr = 'Cliente';
+      }
+
+      if (this.router.url === '/login' || this.router.url === '/') {
+        this.router.navigate(['/dashboard']);
       }
     } else {
       this.isAdmin = false;
