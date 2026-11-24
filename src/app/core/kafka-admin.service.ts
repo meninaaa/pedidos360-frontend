@@ -21,11 +21,19 @@ export class KafkaAdminService {
     return this.http.get<any[]>(`${this.baseUrl}/topics`);
   }
 
+  getTopicDetail(name: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/topics/${encodeURIComponent(name)}`);
+  }
+
   createTopic(payload: CreateKafkaTopicRequest): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/topics`, payload);
   }
 
-  deleteTopic(topicName: string): Observable<any> {
-    return this.http.delete<any>(`${this.baseUrl}/topics/${encodeURIComponent(topicName)}`);
+  updateTopicConfig(name: string, configs: Record<string, string>): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/topics/${encodeURIComponent(name)}/config`, configs);
+  }
+
+  deleteTopic(name: string): Observable<any> {
+    return this.http.delete<any>(`${this.baseUrl}/topics/${encodeURIComponent(name)}`);
   }
 }

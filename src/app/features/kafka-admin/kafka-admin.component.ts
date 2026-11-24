@@ -11,6 +11,13 @@ interface TopicViewItem {
   retentionMs: string;
 }
 
+interface PartitionDetailItem {
+  partition: number;
+  leader: number | string;
+  replicas: number;
+  isr: number;
+}
+
 @Component({
   selector: 'app-kafka-admin',
   standalone: true,
@@ -42,7 +49,7 @@ interface TopicViewItem {
         </div>
       }
 
-      @if (mensajeError && !modalAbierto) {
+      @if (mensajeError && !modalAbierto && !modalEditarAbierto) {
         <div class="banner banner-err">
           <span>{{ mensajeError }}</span>
           <button type="button" class="banner-close" (click)="mensajeError = ''">&times;</button>
@@ -76,14 +83,22 @@ interface TopicViewItem {
                 <td>{{ t.replicationFactor }}</td>
                 <td>{{ t.retentionMs }}</td>
                 <td class="col-actions">
-                  <button
-                    type="button"
-                    class="btn-delete"
-                    [disabled]="esTopicoProtegido(t.name)"
-                    [title]="esTopicoProtegido(t.name) ? 'Tópico reservado del sistema' : 'Eliminar tópico'"
-                    (click)="eliminarTopico(t.name)">
-                    Eliminar
-                  </button>
+                  <div class="row-actions">
+                    <button
+                      type="button"
+                      class="btn-edit"
+                      (click)="abrirModalEditar(t)">
+                      Configurar
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-delete"
+                      [disabled]="esTopicoProtegido(t.name)"
+                      [title]="esTopicoProtegido(t.name) ? 'Tópico reservado del sistema' : 'Eliminar tópico'"
+                      (click)="eliminarTopico(t.name)">
+                      Eliminar
+                    </button>
+                  </div>
                 </td>
               </tr>
             } @empty {
@@ -240,6 +255,107 @@ interface TopicViewItem {
         </div>
       </div>
     }
+
+    @if (modalEditarAbierto && topicEditando) {
+      <div class="modal-backdrop" (click)="cerrarModalEditar()">
+        <div class="modal-panel" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <div>
+              <h3>Configurar tópico</h3>
+              <p><span class="topic-badge">{{ topicEditando.name }}</span></p>
+            </div>
+            <button type="button" class="modal-close" (click)="cerrarModalEditar()">&times;</button>
+          </div>
+
+          <form (ngSubmit)="guardarConfiguracion()" class="modal-body">
+            @if (cargandoDetalle) {
+              <div class="inspect-box">Cargando detalle del broker...</div>
+            } @else {
+              <div class="inspect-box">
+                <div class="inspect-summary">
+                  <span><strong>Particiones:</strong> {{ topicEditando.partitions }}</span>
+                  <span><strong>Réplicas:</strong> {{ topicEditando.replicationFactor }}</span>
+                </div>
+                @if (detalleParticiones.length > 0) {
+                  <div class="partition-pills">
+                    @for (p of detalleParticiones; track p.partition) {
+                      <span class="partition-pill">
+                        P{{ p.partition }} · Líder: Broker {{ p.leader }} · ISR: {{ p.isr }}/{{ p.replicas }}
+                      </span>
+                    }
+                  </div>
+                }
+              </div>
+            }
+
+            <div class="form-group">
+              <label for="editRetention">Retención (retention.ms)</label>
+              <input
+                id="editRetention"
+                type="number"
+                [(ngModel)]="editForm.retentionMs"
+                name="editRetentionMs"
+                min="60000"
+                required />
+              <div class="preset-row">
+                <button
+                  type="button"
+                  class="preset-chip"
+                  [class.preset-active]="editForm.retentionMs === 3600000"
+                  (click)="editForm.retentionMs = 3600000">
+                  1 hora
+                </button>
+                <button
+                  type="button"
+                  class="preset-chip"
+                  [class.preset-active]="editForm.retentionMs === 86400000"
+                  (click)="editForm.retentionMs = 86400000">
+                  24 horas
+                </button>
+                <button
+                  type="button"
+                  class="preset-chip"
+                  [class.preset-active]="editForm.retentionMs === 604800000"
+                  (click)="editForm.retentionMs = 604800000">
+                  7 días
+                </button>
+                <button
+                  type="button"
+                  class="preset-chip"
+                  [class.preset-active]="editForm.retentionMs === 2592000000"
+                  (click)="editForm.retentionMs = 2592000000">
+                  30 días
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="editCleanup">Política de limpieza (cleanup.policy)</label>
+              <select
+                id="editCleanup"
+                [(ngModel)]="editForm.cleanupPolicy"
+                name="editCleanupPolicy">
+                <option value="delete">delete (eliminar segmentos expirados)</option>
+                <option value="compact">compact (compactar por clave de mensaje)</option>
+              </select>
+            </div>
+
+            @if (mensajeError) {
+              <div class="modal-error">{{ mensajeError }}</div>
+            }
+
+            <div class="modal-footer">
+              <button type="button" class="btn-outline" (click)="cerrarModalEditar()" [disabled]="guardando">
+                Cancelar
+              </button>
+              <button type="submit" class="btn-primary-cta" [disabled]="guardando || cargandoDetalle">
+                {{ guardando ? 'Guardando cambios...' : 'Guardar cambios' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    }
   `,
   styles: [`
     .page-wrapper { padding: 24px 32px; color: #0f172a; }
@@ -303,7 +419,11 @@ interface TopicViewItem {
     .topics-table td { padding: 13px 12px; border-bottom: 1px solid #f1f5f9; }
     .topics-table tbody tr:hover { background: #f8fafc; }
     .col-actions { text-align: right; }
+    .row-actions { display: inline-flex; gap: 8px; justify-content: flex-end; }
     .topic-badge { font-family: monospace; font-weight: 600; font-size: 13px; color: #0f172a; background: #f1f5f9; padding: 4px 9px; border-radius: 6px; }
+
+    .btn-edit { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .btn-edit:hover { background: #dbeafe; }
 
     .btn-delete { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }
     .btn-delete:hover:not(:disabled) { background: #fee2e2; }
@@ -325,7 +445,7 @@ interface TopicViewItem {
       border: 1px solid #e2e8f0;
       border-radius: 14px;
       width: 100%;
-      max-width: 480px;
+      max-width: 500px;
       box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.15);
       overflow: hidden;
     }
@@ -336,7 +456,7 @@ interface TopicViewItem {
       padding: 20px 24px 16px 24px;
       border-bottom: 1px solid #f1f5f9;
     }
-    .modal-header h3 { font-size: 18px; font-weight: 700; margin: 0 0 4px 0; color: #0f172a; }
+    .modal-header h3 { font-size: 18px; font-weight: 700; margin: 0 0 6px 0; color: #0f172a; }
     .modal-header p { font-size: 13px; color: #64748b; margin: 0; }
     .modal-close { background: none; border: none; font-size: 22px; line-height: 1; color: #64748b; cursor: pointer; padding: 0 4px; }
     .modal-close:hover { color: #0f172a; }
@@ -345,9 +465,16 @@ interface TopicViewItem {
     .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .form-group { display: flex; flex-direction: column; gap: 6px; }
     .form-group label { font-size: 13px; font-weight: 600; color: #334155; }
-    .form-group > input { padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; color: #0f172a; }
-    .form-group > input:focus { outline: none; border-color: #1d4ed8; box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12); }
+    .form-group > input,
+    .form-group > select { padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; color: #0f172a; background: #ffffff; }
+    .form-group > input:focus,
+    .form-group > select:focus { outline: none; border-color: #1d4ed8; box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12); }
     .field-hint { font-size: 12px; color: #64748b; }
+
+    .inspect-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; font-size: 13px; color: #334155; }
+    .inspect-summary { display: flex; gap: 20px; margin-bottom: 8px; }
+    .partition-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+    .partition-pill { font-family: monospace; font-size: 11px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 3px 8px; color: #0f172a; }
 
     .stepper {
       display: flex;
@@ -428,9 +555,14 @@ export class KafkaAdminComponent implements OnInit {
   readonly isProduction = environment.production;
   topics: TopicViewItem[] = [];
   modalAbierto = false;
+  modalEditarAbierto = false;
+  cargandoDetalle = false;
   guardando = false;
   mensajeOk = '';
   mensajeError = '';
+
+  topicEditando: TopicViewItem | null = null;
+  detalleParticiones: PartitionDetailItem[] = [];
 
   form: CreateKafkaTopicRequest = {
     name: '',
@@ -439,14 +571,20 @@ export class KafkaAdminComponent implements OnInit {
     retentionMs: 604800000
   };
 
+  editForm = {
+    retentionMs: 604800000,
+    cleanupPolicy: 'delete'
+  };
+
   ngOnInit(): void {
     this.cargarTopicos();
   }
 
   @HostListener('document:keydown.escape')
   onEscapeKey(): void {
-    if (this.modalAbierto && !this.guardando) {
-      this.cerrarModal();
+    if (!this.guardando) {
+      if (this.modalAbierto) this.cerrarModal();
+      if (this.modalEditarAbierto) this.cerrarModalEditar();
     }
   }
 
@@ -464,6 +602,76 @@ export class KafkaAdminComponent implements OnInit {
   cerrarModal(): void {
     this.modalAbierto = false;
     this.mensajeError = '';
+  }
+
+  abrirModalEditar(topic: TopicViewItem): void {
+    this.mensajeError = '';
+    this.topicEditando = topic;
+    this.detalleParticiones = [];
+    this.editForm = {
+      retentionMs: 604800000,
+      cleanupPolicy: 'delete'
+    };
+    this.modalEditarAbierto = true;
+    this.cargandoDetalle = true;
+
+    this.kafkaService.getTopicDetail(topic.name).subscribe({
+      next: (res) => {
+        this.cargandoDetalle = false;
+        const configs = res?.configs || res?.configurations || {};
+        const rawRetention = configs['retention.ms'] ?? res?.retentionMs;
+        if (rawRetention && !isNaN(Number(rawRetention))) {
+          this.editForm.retentionMs = Number(rawRetention);
+        }
+        const rawCleanup = configs['cleanup.policy'] ?? res?.cleanupPolicy;
+        if (rawCleanup === 'compact' || rawCleanup === 'delete') {
+          this.editForm.cleanupPolicy = rawCleanup;
+        }
+        if (Array.isArray(res?.partitions)) {
+          this.detalleParticiones = res.partitions.map((p: any, idx: number) => ({
+            partition: p.partition ?? idx,
+            leader: p.leader?.id ?? p.leader ?? '-',
+            replicas: Array.isArray(p.replicas) ? p.replicas.length : Number(topic.replicationFactor) || 3,
+            isr: Array.isArray(p.isr) ? p.isr.length : Number(topic.replicationFactor) || 3
+          }));
+        }
+      },
+      error: () => {
+        this.cargandoDetalle = false;
+      }
+    });
+  }
+
+  cerrarModalEditar(): void {
+    this.modalEditarAbierto = false;
+    this.topicEditando = null;
+    this.mensajeError = '';
+  }
+
+  guardarConfiguracion(): void {
+    if (!this.topicEditando) return;
+    this.guardando = true;
+    this.mensajeOk = '';
+    this.mensajeError = '';
+
+    const payload: Record<string, string> = {
+      'retention.ms': String(Math.max(60000, Number(this.editForm.retentionMs) || 604800000)),
+      'cleanup.policy': this.editForm.cleanupPolicy
+    };
+
+    const nombre = this.topicEditando.name;
+    this.kafkaService.updateTopicConfig(nombre, payload).subscribe({
+      next: () => {
+        this.guardando = false;
+        this.cerrarModalEditar();
+        this.mensajeOk = `Configuración de "${nombre}" actualizada correctamente.`;
+        this.cargarTopicos();
+      },
+      error: (err) => {
+        this.guardando = false;
+        this.mensajeError = err?.error?.message || 'No se pudo actualizar la configuración del tópico.';
+      }
+    });
   }
 
   cambiarParticiones(delta: number): void {
@@ -494,11 +702,14 @@ export class KafkaAdminComponent implements OnInit {
               ? item.partitions.length
               : (item.partitions ?? item.partitionCount ?? 3);
 
+            const configs = item.configs || item.configurations || {};
+            const retention = configs['retention.ms'] ?? item.retentionMs;
+
             return {
               name: item.name || item.topicName || '',
               partitions: partitionCount,
               replicationFactor: item.replicationFactor ?? 3,
-              retentionMs: item.retentionMs ? `${item.retentionMs} ms` : 'Configurada en broker'
+              retentionMs: retention ? `${retention} ms` : 'Configurada en broker'
             };
           })
           .filter((t) => t.name && !t.name.startsWith('__'));

@@ -14,7 +14,7 @@ import { environment } from '../../../environments/environment';
 export class DashboardComponent implements OnInit {
   userName: string = '';
   userRoleStr: string = '';
-  
+
   isAdmin: boolean = false;
   isOperator: boolean = false;
   isCustomer: boolean = false;
@@ -38,7 +38,7 @@ export class DashboardComponent implements OnInit {
       const name = (account.name || '').toLowerCase();
       const email = (account.username || '').toLowerCase();
       const claims: any = account.idTokenClaims;
-      const roles = claims?.roles || []; 
+      const roles = claims?.roles || [];
 
       const hasAdminRole = roles.includes('Administrador') || roles.includes('Admin');
       const hasOperatorRole = roles.includes('Operador de Logística') || roles.includes('Operador');
@@ -75,13 +75,42 @@ export class DashboardComponent implements OnInit {
   cargarDatosDashboard() {
     if (this.isAdmin) {
       this.http.get<any>(`${environment.apiUrl}/reports/summary`).subscribe({
-        next: (res) => this.resumenAdmin = res || {},
+        next: (res) => {
+          if (res) {
+            this.resumenAdmin = {
+              ...this.resumenAdmin,
+              ...res,
+              ventasTotales: res.ventasTotales || this.resumenAdmin.ventasTotales || 0,
+              pedidosActivos: res.pedidosActivos || this.resumenAdmin.pedidosActivos || 0
+            };
+          }
+        },
         error: (err) => console.error('Error cargando resumen admin:', err)
       });
 
       this.http.get<any[]>(`${environment.apiUrl}/orders/pending`).subscribe({
         next: (res) => this.pedidosOperador = res || [],
         error: (err) => console.error('Error cargando pendientes para admin:', err)
+      });
+
+      this.http.get<any[]>(`${environment.apiUrl}/orders`).subscribe({
+        next: (allOrders) => {
+          const lista = Array.isArray(allOrders) ? allOrders : [];
+          const activos = lista.filter(
+            (o) => o.status !== 'ENTREGADO' && o.status !== 'CANCELADO'
+          ).length;
+          const ingresos = lista
+            .filter((o) => o.status === 'ENTREGADO')
+            .reduce((acc, o) => acc + (Number(o.total) || 0), 0);
+
+          if (!this.resumenAdmin?.pedidosActivos && activos > 0) {
+            this.resumenAdmin = { ...this.resumenAdmin, pedidosActivos: activos };
+          }
+          if (!this.resumenAdmin?.ventasTotales && ingresos > 0) {
+            this.resumenAdmin = { ...this.resumenAdmin, ventasTotales: ingresos };
+          }
+        },
+        error: (err) => console.error('Error cargando pedidos totales para respaldo:', err)
       });
 
     } else if (this.isCustomer) {
