@@ -31,10 +31,10 @@
   <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px; margin-bottom: 24px; align-items: center;">
     <div style="position: relative;">
       <svg style="position: absolute; left: 14px; top: 12px; stroke: #94a3b8;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      <input type="text" [(ngModel)]="filtroTexto" placeholder="Buscar por folio o cliente..." style="width: 100%; box-sizing: border-box; padding: 10px 14px 10px 38px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #0f172a; outline: none; background: white;">
+      <input type="text" [(ngModel)]="filtroTexto" (ngModelChange)="onFiltroChange()" placeholder="Buscar por folio o cliente..." style="width: 100%; box-sizing: border-box; padding: 10px 14px 10px 38px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #0f172a; outline: none; background: white;">
     </div>
     <div>
-      <select [(ngModel)]="filtroEstado" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #475569; background: white; outline: none; cursor: pointer;">
+      <select [(ngModel)]="filtroEstado" (ngModelChange)="onFiltroChange()" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #475569; background: white; outline: none; cursor: pointer;">
         <option value="">Todos los estados</option>
         <option value="CREADO">Creado</option>
         <option value="ACEPTADO">Aceptado</option>
@@ -45,7 +45,7 @@
       </select>
     </div>
     <div>
-      <input type="date" [(ngModel)]="filtroFecha" style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #475569; outline: none; background: white;">
+      <input type="date" [(ngModel)]="filtroFecha" (ngModelChange)="onFiltroChange()" style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #475569; outline: none; background: white;">
     </div>
   </div>
 
@@ -134,7 +134,7 @@
   <div style="background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; overflow: hidden;">
     <div style="padding: 16px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
       <h3 style="margin: 0; font-size: 14px; font-weight: 700; color: #0f172a;">
-        Registro de Pedidos <span style="color: #64748b; font-weight: 400; font-size: 12px; margin-left: 8px;">({{ pedidosFiltrados.length }} registros)</span>
+        Registro de Pedidos <span style="color: #64748b; font-weight: 400; font-size: 12px; margin-left: 8px;">({{ totalRegistros }} registros)</span>
       </h3>
       <span style="font-size: 12px; color: #64748b;">Ordenados por ID</span>
     </div>
@@ -152,7 +152,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let pedido of pedidosFiltrados" style="transition: background 0.2s;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='transparent'">
+          <tr *ngFor="let pedido of pedidosPaginados" style="transition: background 0.2s;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='transparent'">
             <td style="padding: 16px 24px; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-weight: 700; font-size: 13px;">#{{ pedido.id }}</td>
             <td style="padding: 16px 24px; border-bottom: 1px solid #f1f5f9; color: #0f172a; font-size: 13px; font-weight: 500;">{{ pedido.customerId }}</td>
             <td style="padding: 16px 24px; border-bottom: 1px solid #f1f5f9; color: #64748b; font-size: 13px;">{{ pedido.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
@@ -202,7 +202,7 @@
             </td>
           </tr>
 
-          <tr *ngIf="pedidosFiltrados.length === 0">
+          <tr *ngIf="totalRegistros === 0">
             <td colspan="6" style="padding: 60px 20px; text-align: center; color: #94a3b8; font-size: 14px;">
               No se encontraron registros de pedidos.
             </td>
@@ -213,11 +213,36 @@
 
     <!-- PAGINACIÓN -->
     <div style="padding: 16px 24px; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-      <span style="font-size: 13px; color: #64748b;">Mostrando 1 - {{ pedidosFiltrados.length }} de {{ pedidosFiltrados.length }} registros</span>
-      <div style="display: flex; gap: 8px;">
-        <button style="background: white; border: 1px solid #cbd5e1; color: #475569; font-size: 13px; padding: 6px 14px; border-radius: 6px; cursor: pointer;">Anterior</button>
-        <button style="background: #2563eb; border: 1px solid #2563eb; color: white; font-weight: 600; font-size: 13px; padding: 6px 12px; border-radius: 6px; cursor: pointer;">1</button>
-        <button style="background: white; border: 1px solid #cbd5e1; color: #475569; font-size: 13px; padding: 6px 14px; border-radius: 6px; cursor: pointer;">Siguiente</button>
+      <span style="font-size: 13px; color: #64748b;">Mostrando {{ indiceInicio }} - {{ indiceFin }} de {{ totalRegistros }} registros</span>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button type="button"
+                (click)="cambiarPagina(paginaActual - 1)"
+                [disabled]="paginaActual <= 1"
+                [ngStyle]="{'opacity': paginaActual <= 1 ? '0.5' : '1', 'cursor': paginaActual <= 1 ? 'not-allowed' : 'pointer'}"
+                style="background: white; border: 1px solid #cbd5e1; color: #475569; font-size: 13px; padding: 6px 14px; border-radius: 6px;">
+          Anterior
+        </button>
+
+        <button *ngFor="let p of paginasArray"
+                type="button"
+                (click)="cambiarPagina(p)"
+                [ngStyle]="{
+                  'background': p === paginaActual ? '#2563eb' : 'white',
+                  'border': p === paginaActual ? '1px solid #2563eb' : '1px solid #cbd5e1',
+                  'color': p === paginaActual ? 'white' : '#475569',
+                  'font-weight': p === paginaActual ? '600' : '400'
+                }"
+                style="font-size: 13px; padding: 6px 12px; border-radius: 6px; cursor: pointer;">
+          {{ p }}
+        </button>
+
+        <button type="button"
+                (click)="cambiarPagina(paginaActual + 1)"
+                [disabled]="paginaActual >= totalPaginas"
+                [ngStyle]="{'opacity': paginaActual >= totalPaginas ? '0.5' : '1', 'cursor': paginaActual >= totalPaginas ? 'not-allowed' : 'pointer'}"
+                style="background: white; border: 1px solid #cbd5e1; color: #475569; font-size: 13px; padding: 6px 14px; border-radius: 6px;">
+          Siguiente
+        </button>
       </div>
     </div>
   </div>

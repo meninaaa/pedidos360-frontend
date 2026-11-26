@@ -14,7 +14,7 @@ import { environment } from '../../../environments/environment';
 export class OrdersComponent implements OnInit {
   pedidos: any[] = [];
   productosDisponibles: any[] = [];
-  
+
   isAdmin: boolean = false;
   isOperator: boolean = false;
   isCustomer: boolean = false;
@@ -22,18 +22,22 @@ export class OrdersComponent implements OnInit {
 
   mostrarFormulario: boolean = false;
   nuevoCliente: string = '';
-  
+
   // Variables de filtros superiores
   filtroTexto: string = '';
   filtroEstado: string = '';
   filtroFecha: string = '';
+
+  // Variables de paginación
+  paginaActual: number = 1;
+  readonly itemsPorPagina: number = 10;
 
   // Variables del Carrito y Cantidad
   productoSeleccionadoId: number | null = null;
   cantidadSeleccionada: number = 1;
   carrito: any[] = [];
   nuevoTotal: number = 0;
-  
+
   notificacion: string | null = null;
   pedidoSeleccionado: any = null;
 
@@ -51,15 +55,15 @@ export class OrdersComponent implements OnInit {
     const accounts = this.msalService.instance.getAllAccounts();
     if (accounts.length > 0) {
       const account = accounts[0];
-      this.userEmail = account.username; 
-      
+      this.userEmail = account.username;
+
       const claims: any = account.idTokenClaims;
-      const roles = claims?.roles || []; 
+      const roles = claims?.roles || [];
 
       this.isAdmin = roles.includes('Administrador') || roles.includes('Admin');
       this.isOperator = roles.includes('Operador de Logística') || roles.includes('Operador');
       this.isCustomer = roles.includes('Cliente') || roles.includes('Customer') || (!this.isAdmin && !this.isOperator);
-      
+
       if (this.isCustomer) {
         this.nuevoCliente = this.userEmail;
       }
@@ -68,7 +72,7 @@ export class OrdersComponent implements OnInit {
 
   cargarPedidos() {
     let endpoint = `${environment.apiUrl}/orders`;
-    
+
     if (this.isCustomer) {
       endpoint = `${environment.apiUrl}/orders/customer?email=${this.userEmail}`;
     } else if (this.isOperator) {
@@ -76,7 +80,12 @@ export class OrdersComponent implements OnInit {
     }
 
     this.http.get<any[]>(endpoint).subscribe({
-      next: (data) => this.pedidos = data || [],
+      next: (data) => {
+        this.pedidos = data || [];
+        if (this.paginaActual > this.totalPaginas) {
+          this.paginaActual = 1;
+        }
+      },
       error: (err) => console.error('Error cargando pedidos:', err)
     });
   }
@@ -103,7 +112,7 @@ export class OrdersComponent implements OnInit {
       const idStr = String(p.id || '');
       const customer = (p.customerId || '').toLowerCase();
       const texto = this.filtroTexto.toLowerCase();
-      
+
       const matchTexto = !this.filtroTexto || idStr.includes(texto) || customer.includes(texto);
       const matchEstado = !this.filtroEstado || p.status === this.filtroEstado;
       const matchFecha = !this.filtroFecha || (p.createdAt || '').includes(this.filtroFecha);
@@ -112,14 +121,54 @@ export class OrdersComponent implements OnInit {
     });
   }
 
+  // Getters y controles de paginación (10 por página)
+  get totalRegistros(): number {
+    return this.pedidosFiltrados.length;
+  }
+
+  get totalPaginas(): number {
+    return Math.max(1, Math.ceil(this.totalRegistros / this.itemsPorPagina));
+  }
+
+  get paginasArray(): number[] {
+    return Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
+  }
+
+  get pedidosPaginados(): any[] {
+    const paginaSegura = Math.min(this.paginaActual, this.totalPaginas);
+    const inicio = (paginaSegura - 1) * this.itemsPorPagina;
+    return this.pedidosFiltrados.slice(inicio, inicio + this.itemsPorPagina);
+  }
+
+  get indiceInicio(): number {
+    if (this.totalRegistros === 0) return 0;
+    const paginaSegura = Math.min(this.paginaActual, this.totalPaginas);
+    return (paginaSegura - 1) * this.itemsPorPagina + 1;
+  }
+
+  get indiceFin(): number {
+    const paginaSegura = Math.min(this.paginaActual, this.totalPaginas);
+    return Math.min(paginaSegura * this.itemsPorPagina, this.totalRegistros);
+  }
+
+  cambiarPagina(pagina: number): void {
+    if (pagina >= 1 && pagina <= this.totalPaginas) {
+      this.paginaActual = pagina;
+    }
+  }
+
+  onFiltroChange(): void {
+    this.paginaActual = 1;
+  }
+
   agregarAlCarrito() {
     if (!this.productoSeleccionadoId || this.cantidadSeleccionada < 1) return;
-    
+
     const prod = this.productosDisponibles.find(p => p.id === Number(this.productoSeleccionadoId));
     if (prod) {
       const precio = prod.precio || prod.price || 0;
       const subtotal = precio * this.cantidadSeleccionada;
-      
+
       this.carrito.push({
         productId: prod.id,
         nombre: prod.nombre || prod.name,
@@ -127,7 +176,7 @@ export class OrdersComponent implements OnInit {
         quantity: this.cantidadSeleccionada,
         subtotal: subtotal
       });
-      
+
       this.calcularTotal();
       this.productoSeleccionadoId = null;
       this.cantidadSeleccionada = 1;
@@ -172,7 +221,7 @@ export class OrdersComponent implements OnInit {
       next: () => {
         this.cargarPedidos();
         this.mostrarNotificacion(`¡Orden procesada con éxito!`);
-        
+
         if (!this.isCustomer) this.nuevoCliente = '';
         this.carrito = [];
         this.nuevoTotal = 0;
@@ -199,7 +248,6 @@ export class OrdersComponent implements OnInit {
   }
 
   iniciarPagoWebpay(orderId: number, totalStr: any) {
-    // Aseguramos que el monto sea un número entero puro
     const montoNumerico = Math.round(Number(String(totalStr).replace(/[^0-9.-]+/g, "")));
 
     if (!montoNumerico || montoNumerico <= 0) {
@@ -207,7 +255,6 @@ export class OrdersComponent implements OnInit {
       return;
     }
 
-    // Aseguramos la ruta exacta hacia el endpoint de pagos
     const endpoint = `${environment.apiUrl}/payments/create?amount=${montoNumerico}&orderId=${orderId}`;
 
     this.http.post<any>(endpoint, {}).subscribe({
@@ -269,7 +316,6 @@ export class OrdersComponent implements OnInit {
     return (total || 0) - this.getNeto(total);
   }
 
-  // Imprimir documento directamente en impresora física
   imprimirBoleta() {
     const contenidoHtml = document.getElementById('area-boleta-fiscal')?.innerHTML;
     if (!contenidoHtml) return;
@@ -298,7 +344,6 @@ export class OrdersComponent implements OnInit {
     }, 500);
   }
 
-  // Descarga directa del archivo PDF usando html2pdf.js
   descargarPDF() {
     const elemento = document.getElementById('area-boleta-fiscal');
     if (!elemento) return;
