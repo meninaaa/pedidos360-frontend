@@ -14,18 +14,22 @@ import { environment } from '../../../environments/environment';
 })
 export class CatalogComponent implements OnInit {
   productos: any[] = [];
-  
+
   isAdmin: boolean = false;
   isOperator: boolean = false;
   isCustomer: boolean = false;
-  
+
   filtroTexto: string = '';
   filtroDisponibilidad: string = 'todos';
+
+  // Variables de paginación
+  paginaActual: number = 1;
+  readonly itemsPorPagina: number = 10;
 
   mostrarModal = false;
   modoEdicion = false;
   productoActual: any = { id: null, nombre: '', precio: 0, stock: 0, estado: 'DISPONIBLE' };
-  
+
   notificacion: string = '';
   productoAEliminar: any = null;
 
@@ -50,7 +54,7 @@ export class CatalogComponent implements OnInit {
       const name = (account.name || '').toLowerCase();
       const email = (account.username || '').toLowerCase();
       const claims: any = account.idTokenClaims;
-      const roles = claims?.roles || []; 
+      const roles = claims?.roles || [];
 
       const hasAdminRole = roles.includes('Administrador') || roles.includes('Admin');
       const hasOperatorRole = roles.includes('Operador de Logística') || roles.includes('Operador');
@@ -102,6 +106,10 @@ export class CatalogComponent implements OnInit {
     } else {
       this.productos = [];
     }
+
+    if (this.paginaActual > this.totalPaginas) {
+      this.paginaActual = 1;
+    }
   }
 
   getStock(p: any): number {
@@ -113,9 +121,9 @@ export class CatalogComponent implements OnInit {
       const nombre = (p.nombre || p.name || '').toLowerCase();
       const idStr = String(p.id || '');
       const textoMatch = !this.filtroTexto || nombre.includes(this.filtroTexto.toLowerCase()) || idStr.includes(this.filtroTexto);
-      
+
       const stockActual = this.getStock(p);
-      
+
       let disponibilidadMatch = true;
       if (this.filtroDisponibilidad === 'disponible') {
         disponibilidadMatch = (stockActual >= 10);
@@ -124,9 +132,49 @@ export class CatalogComponent implements OnInit {
       } else if (this.filtroDisponibilidad === 'agotado') {
         disponibilidadMatch = (stockActual === 0);
       }
-      
+
       return textoMatch && disponibilidadMatch;
     });
+  }
+
+  // Getters y controles de paginación (10 por página)
+  get totalProductos(): number {
+    return this.productosFiltrados.length;
+  }
+
+  get totalPaginas(): number {
+    return Math.max(1, Math.ceil(this.totalProductos / this.itemsPorPagina));
+  }
+
+  get paginasArray(): number[] {
+    return Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
+  }
+
+  get productosPaginados(): any[] {
+    const paginaSegura = Math.min(this.paginaActual, this.totalPaginas);
+    const inicio = (paginaSegura - 1) * this.itemsPorPagina;
+    return this.productosFiltrados.slice(inicio, inicio + this.itemsPorPagina);
+  }
+
+  get indiceInicio(): number {
+    if (this.totalProductos === 0) return 0;
+    const paginaSegura = Math.min(this.paginaActual, this.totalPaginas);
+    return (paginaSegura - 1) * this.itemsPorPagina + 1;
+  }
+
+  get indiceFin(): number {
+    const paginaSegura = Math.min(this.paginaActual, this.totalPaginas);
+    return Math.min(paginaSegura * this.itemsPorPagina, this.totalProductos);
+  }
+
+  cambiarPagina(pagina: number): void {
+    if (pagina >= 1 && pagina <= this.totalPaginas) {
+      this.paginaActual = pagina;
+    }
+  }
+
+  onFiltroChange(): void {
+    this.paginaActual = 1;
   }
 
   abrirModalNuevo() {
@@ -152,17 +200,17 @@ export class CatalogComponent implements OnInit {
     const id = this.productoActual.id;
     if (this.modoEdicion) {
       this.http.put(`${environment.apiUrl}/catalog/${id}`, this.productoActual).subscribe({
-        next: () => { 
-          this.cargarCatalogo(); 
-          this.cerrarModal(); 
-          this.mostrarNotificacion('Producto actualizado exitosamente.'); 
+        next: () => {
+          this.cargarCatalogo();
+          this.cerrarModal();
+          this.mostrarNotificacion('Producto actualizado exitosamente.');
         },
         error: () => {
           this.http.put(`${environment.apiUrl}/catalog/products/${id}`, this.productoActual).subscribe({
-            next: () => { 
-              this.cargarCatalogo(); 
-              this.cerrarModal(); 
-              this.mostrarNotificacion('Producto actualizado exitosamente.'); 
+            next: () => {
+              this.cargarCatalogo();
+              this.cerrarModal();
+              this.mostrarNotificacion('Producto actualizado exitosamente.');
             },
             error: (err) => console.error('Error actualizando producto:', err)
           });
@@ -170,17 +218,17 @@ export class CatalogComponent implements OnInit {
       });
     } else {
       this.http.post(`${environment.apiUrl}/catalog`, this.productoActual).subscribe({
-        next: () => { 
-          this.cargarCatalogo(); 
-          this.cerrarModal(); 
-          this.mostrarNotificacion('Producto creado exitosamente.'); 
+        next: () => {
+          this.cargarCatalogo();
+          this.cerrarModal();
+          this.mostrarNotificacion('Producto creado exitosamente.');
         },
         error: () => {
           this.http.post(`${environment.apiUrl}/catalog/products`, this.productoActual).subscribe({
-            next: () => { 
-              this.cargarCatalogo(); 
-              this.cerrarModal(); 
-              this.mostrarNotificacion('Producto creado exitosamente.'); 
+            next: () => {
+              this.cargarCatalogo();
+              this.cerrarModal();
+              this.mostrarNotificacion('Producto creado exitosamente.');
             },
             error: (err) => console.error('Error creando producto:', err)
           });
