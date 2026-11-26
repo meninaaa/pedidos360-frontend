@@ -106,19 +106,21 @@ export class OrdersComponent implements OnInit {
     });
   }
 
-  // Getter para filtrar pedidos en tiempo real con los inputs superiores
+  // Getter para filtrar y ordenar pedidos de mayor a menor ID
   get pedidosFiltrados() {
-    return this.pedidos.filter(p => {
-      const idStr = String(p.id || '');
-      const customer = (p.customerId || '').toLowerCase();
-      const texto = this.filtroTexto.toLowerCase();
+    return this.pedidos
+      .filter(p => {
+        const idStr = String(p.id || '');
+        const customer = (p.customerId || '').toLowerCase();
+        const texto = this.filtroTexto.toLowerCase();
 
-      const matchTexto = !this.filtroTexto || idStr.includes(texto) || customer.includes(texto);
-      const matchEstado = !this.filtroEstado || p.status === this.filtroEstado;
-      const matchFecha = !this.filtroFecha || (p.createdAt || '').includes(this.filtroFecha);
+        const matchTexto = !this.filtroTexto || idStr.includes(texto) || customer.includes(texto);
+        const matchEstado = !this.filtroEstado || p.status === this.filtroEstado;
+        const matchFecha = !this.filtroFecha || (p.createdAt || '').includes(this.filtroFecha);
 
-      return matchTexto && matchEstado && matchFecha;
-    });
+        return matchTexto && matchEstado && matchFecha;
+      })
+      .sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
   }
 
   // Getters y controles de paginación (10 por página)
